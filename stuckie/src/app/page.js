@@ -93,12 +93,16 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-amber-400/30 px-4 py-2 flex items-center justify-between bg-zinc-950 shrink-0">
         <div className="flex items-center gap-2">
+          <button onClick={() => setStarted(false)}
+            className="text-zinc-300 text-sm border border-zinc-600 hover:border-zinc-400 hover:text-white transition-colors px-2 py-1 rounded"
+            title="Kembali ke menu">
+            ← MENU
+          </button>
           <span className="text-amber-400 font-bold text-xl tracking-widest" style={{ textShadow: '0 0 10px #f59e0b' }}>
             STUCKIE
           </span>
           <span className="text-green-400 text-xs animate-pulse">●</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
+        </div>        <div className="flex items-center gap-2 text-xs">
           {passiveIncome > 0 && (
             <span className="text-green-400 hidden sm:block">
               +{passiveIncome >= 1000 ? `${(passiveIncome/1000).toFixed(1)}k` : Math.floor(passiveIncome)}/s
@@ -169,9 +173,10 @@ export default function Home() {
                 const meta = getSlotMeta(i);
                 const isActive = currentSlot === i;
                 return (
-                  <button key={i} onClick={() => handleSave(i)}
-                    className={`flex items-center justify-between px-3 py-2 border rounded text-xs transition-all active:scale-95
-                      ${isActive ? 'border-amber-400 bg-amber-400/10 text-amber-400' : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}>
+                  <div key={i}
+                    className={`flex items-center justify-between px-3 py-2 border rounded text-xs transition-all cursor-pointer active:scale-95
+                      ${isActive ? 'border-amber-400 bg-amber-400/10 text-amber-400' : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                    onClick={() => handleSave(i)}>
                     <span className="font-bold">SLOT {i + 1}{isActive ? ' (aktif)' : ''}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-zinc-500">
@@ -179,13 +184,13 @@ export default function Home() {
                       </span>
                       {meta && (
                         <button onClick={(e) => { e.stopPropagation(); exportSave(i); setSaveToast('📤 File didownload!'); setTimeout(() => setSaveToast(null), 2000); }}
-                          className="text-zinc-600 hover:text-cyan-400 transition-colors px-1"
+                          className="text-cyan-400 hover:text-cyan-300 transition-colors px-1 text-base"
                           title="Export ke .txt">
                           📤
                         </button>
                       )}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

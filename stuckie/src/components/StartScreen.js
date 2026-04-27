@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { useGameStore, SAVE_SLOTS } from '@/store/gameStore';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useGameStore, SAVE_SLOTS, SAVE_KEY_PREFIX } from '@/store/gameStore';
 
 function formatRp(n) {
   if (!n) return 'Rp0';
@@ -22,9 +22,24 @@ function formatTime(secs) {
   return h > 0 ? `${h}j ${m}m` : `${m}m`;
 }
 
+// Read slot meta directly from localStorage — no Zustand dependency
+function readSlotMeta(slot) {
+  try {
+    const raw = localStorage.getItem(`${SAVE_KEY_PREFIX}${slot}`);
+    if (!raw) return null;
+    const json = decodeURIComponent(escape(atob(raw.trim())));
+    const save = JSON.parse(json);
+    return { savedAt: save.savedAt, balance: save.balance, level: save.level ?? 1, gameTime: save.gameTime ?? 0 };
+  } catch { return null; }
+}
+
+function readAllSlots() {
+  return Array.from({ length: SAVE_SLOTS }, (_, i) => readSlotMeta(i));
+}
+
 export default function StartScreen({ onStart }) {
-  const { loadSlot, newGame, deleteSlot, getSlotMeta, exportSave, importSave } = useGameStore();
-  const [slots, setSlots] = useState(Array(SAVE_SLOTS).fill(null));
+  const { loadSlot, newGame, deleteSlot, exportSave, importSave } = useGameStore();
+  const [slots, setSlots] = useState(() => readAllSlots());
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmNew, setConfirmNew] = useState(null);
   const [blink, setBlink] = useState(true);
@@ -32,13 +47,21 @@ export default function StartScreen({ onStart }) {
   const fileInputRef = useRef(null);
   const importSlotRef = useRef(null);
 
+  // Re-read slots every time component mounts or becomes visible
   useEffect(() => {
-    setSlots(Array.from({ length: SAVE_SLOTS }, (_, i) => getSlotMeta(i)));
+    setSlots(readAllSlots());
     const iv = setInterval(() => setBlink(b => !b), 600);
     return () => clearInterval(iv);
-  }, [getSlotMeta]);
+  }, []);
 
-  const refreshSlots = () => setSlots(Array.from({ length: SAVE_SLOTS }, (_, i) => getSlotMeta(i)));
+  // Also re-read when window regains focus
+  useEffect(() => {
+    const handler = () => setSlots(readAllSlots());
+    window.addEventListener('focus', handler);
+    return () => window.removeEventListener('focus', handler);
+  }, []);
+
+  const refreshSlots = useCallback(() => setSlots(readAllSlots()), []);
 
   const showToast = (msg, ok = true) => {
     setToast({ msg, ok });
@@ -57,12 +80,12 @@ export default function StartScreen({ onStart }) {
     deleteSlot(slot);
     refreshSlots();
     setConfirmDelete(null);
-    showToast(`Slot ${slot + 1} dihapus`);
+    showToast(`🗑 Slot ${slot + 1} dihapus`);
   };
 
   const handleExport = (slot) => {
     const ok = exportSave(slot);
-    showToast(ok ? `📥 Slot ${slot + 1} diexport!` : 'Export gagal', ok);
+    showToast(ok ? `📤 Slot ${slot + 1} diexport!` : 'Export gagal', ok);
   };
 
   const handleImportClick = (slot) => {
@@ -76,8 +99,7 @@ export default function StartScreen({ onStart }) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const content = ev.target.result;
-      const ok = importSave(importSlotRef.current, content);
+      const ok = importSave(importSlotRef.current, ev.target.result);
       if (ok) {
         refreshSlots();
         showToast(`✅ Slot ${importSlotRef.current + 1} berhasil diimport!`);
@@ -93,7 +115,6 @@ export default function StartScreen({ onStart }) {
       {/* Scanlines */}
       <div className="pointer-events-none fixed inset-0 z-10"
         style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px)' }} />
-
       {/* Grid bg */}
       <div className="pointer-events-none fixed inset-0"
         style={{
@@ -102,8 +123,6 @@ export default function StartScreen({ onStart }) {
         }} />
 
       <div className="relative z-20 flex flex-col items-center gap-6 w-full max-w-lg">
-
-        {/* Hidden file input for import */}
         <input ref={fileInputRef} type="file" accept=".txt" className="hidden" onChange={handleFileChange} />
 
         {/* Logo */}
@@ -119,8 +138,7 @@ export default function StartScreen({ onStart }) {
         <div className="w-full flex flex-col gap-3">
           <div className="text-amber-400 text-xs tracking-widest text-center">▶ PILIH SAVE FILE</div>
 
-          {Array.from({ length: SAVE_SLOTS }, (_, i) => {
-            const meta = slots[i];
+          {slots.map((meta, i) => {
             const isConfirmingDelete = confirmDelete === i;
             const isConfirmingNew = confirmNew === i;
 
@@ -132,12 +150,18 @@ export default function StartScreen({ onStart }) {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-zinc-400 text-xs tracking-widest">SLOT {i + 1}</span>
                   {meta && !isConfirmingDelete && !isConfirmingNew && (
-                    <button
-                      onClick={() => setConfirmDelete(i)}
-                      className="text-zinc-600 text-xs hover:text-red-400 transition-colors px-1"
-                    >
-                      🗑
-                    </button>
+                    <div className="flex gap-1">
+                      <button onClick={() => handleExport(i)}
+                        className="text-cyan-400 text-base hover:text-cyan-300 transition-colors px-2 py-1 rounded hover:bg-cyan-400/10"
+                        title="Export ke .txt">
+                        📤
+                      </button>
+                      <button onClick={() => setConfirmDelete(i)}
+                        className="text-red-400 text-base hover:text-red-300 transition-colors px-2 py-1 rounded hover:bg-red-400/10"
+                        title="Hapus save">
+                        🗑️
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -179,7 +203,6 @@ export default function StartScreen({ onStart }) {
                 {!isConfirmingDelete && !isConfirmingNew && (
                   meta ? (
                     <div className="flex flex-col gap-2">
-                      {/* Save info */}
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         <div>
                           <div className="text-zinc-600">BALANCE</div>
@@ -195,7 +218,6 @@ export default function StartScreen({ onStart }) {
                         </div>
                       </div>
                       <div className="text-zinc-600 text-xs">Disimpan: {formatDate(meta.savedAt)}</div>
-                      {/* Actions */}
                       <div className="flex gap-2 mt-1">
                         <button onClick={() => handleLoad(i)}
                           className="flex-1 py-2 border-2 border-amber-400 text-amber-400 text-xs font-bold rounded hover:bg-amber-400/20 active:scale-95 transition-all"
@@ -205,11 +227,6 @@ export default function StartScreen({ onStart }) {
                         <button onClick={() => handleNew(i)}
                           className="px-3 py-2 border border-zinc-600 text-zinc-400 text-xs rounded hover:border-zinc-400 hover:text-zinc-200 active:scale-95 transition-all">
                           BARU
-                        </button>
-                        <button onClick={() => handleExport(i)}
-                          className="px-2 py-2 border border-zinc-700 text-zinc-500 text-xs rounded hover:border-cyan-400 hover:text-cyan-400 active:scale-95 transition-all"
-                          title="Export ke file .txt">
-                          📤
                         </button>
                       </div>
                     </div>
@@ -240,7 +257,6 @@ export default function StartScreen({ onStart }) {
         </div>
       </div>
 
-      {/* Toast */}
       {toast && (
         <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded border font-mono text-xs whitespace-nowrap
           ${toast.ok !== false ? 'border-green-500 bg-green-900 text-green-300' : 'border-red-500 bg-red-900 text-red-300'}`}>
