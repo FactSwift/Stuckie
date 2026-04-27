@@ -39,7 +39,7 @@ function readAllSlots() {
 
 export default function StartScreen({ onStart }) {
   const { loadSlot, newGame, deleteSlot, exportSave, importSave } = useGameStore();
-  const [slots, setSlots] = useState(() => readAllSlots());
+  const [slots, setSlots] = useState(Array(SAVE_SLOTS).fill(null));
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmNew, setConfirmNew] = useState(null);
   const [blink, setBlink] = useState(true);

@@ -83,7 +83,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-amber-400 font-mono flex flex-col select-none overflow-hidden">
+    <div className="min-h-screen bg-black text-amber-400 font-mono flex flex-col overflow-hidden">
       {/* Scanlines */}
       <div className="pointer-events-none fixed inset-0 z-40"
         style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px)' }} />
@@ -102,7 +102,8 @@ export default function Home() {
             STUCKIE
           </span>
           <span className="text-green-400 text-xs animate-pulse">●</span>
-        </div>        <div className="flex items-center gap-2 text-xs">
+        </div>
+        <div className="flex items-center gap-2 text-xs">
           {passiveIncome > 0 && (
             <span className="text-green-400 hidden sm:block">
               +{passiveIncome >= 1000 ? `${(passiveIncome/1000).toFixed(1)}k` : Math.floor(passiveIncome)}/s
