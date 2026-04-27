@@ -1,0 +1,350 @@
+'use client';
+import { useEffect, useState, useRef } from 'react';
+import { useGameStore, REAL_ASSETS } from '@/store/gameStore';
+import { PixelArt, NPC_SPRITES, BUILDING_SPRITES, ENV_SPRITES, ASSET_ENV, ASSET_GROUND } from './PixelSprites';
+
+const SCALE = 2;
+const TILE_COLS = 6;
+const TILE_H = 200;
+
+const ASSET_NPCS = {
+  warung:    ['cook', 'person', 'shopper'],
+  cafe:      ['cook', 'shopper'],
+  startup:   ['exec', 'exec', 'worker'],
+  kos:       ['person', 'person'],
+  ruko:      ['exec', 'shopper'],
+  apartemen: ['person', 'exec', 'person'],
+  mall:      ['shopper', 'shopper', 'exec', 'person'],
+  gedung:    ['exec', 'exec', 'worker'],
+  pabrik:    ['worker', 'worker', 'person'],
+  bank:      ['exec', 'shopper', 'person'],
+};
+
+const NPC_TYPE_MAP = {
+  cook:    ['cook_f1',    'cook_f2'],
+  exec:    ['exec_f1',    'exec_f2'],
+  worker:  ['worker_f1',  'worker_f2'],
+  shopper: ['shopper_f1', 'shopper_f2'],
+  person:  ['person_f1',  'person_f2'],
+};
+
+// ─── Walking NPC ──────────────────────────────────────────────────────────────
+function WalkingNPC({ type, startX, speed, width, flip }) {
+  const [x, setX] = useState(startX);
+  const [frame, setFrame] = useState(0);
+  const xRef = useRef(startX);
+  const dirRef = useRef(flip ? -1 : 1);
+
+  useEffect(() => {
+    const frames = NPC_TYPE_MAP[type] || NPC_TYPE_MAP.person;
+    const move = setInterval(() => {
+      xRef.current += dirRef.current * speed;
+      if (xRef.current > width + 10) xRef.current = -10;
+      else if (xRef.current < -10) xRef.current = width + 10;
+      setX(xRef.current);
+    }, 50);
+    const anim = setInterval(() => setFrame(f => (f + 1) % frames.length), 200);
+    return () => { clearInterval(move); clearInterval(anim); };
+  }, [type, speed, width]);
+
+  const frames = NPC_TYPE_MAP[type] || NPC_TYPE_MAP.person;
+  const sprite = NPC_SPRITES[frames[frame]];
+  if (!sprite) return null;
+
+  return (
+    <div className="absolute pointer-events-none" style={{
+      left: x, bottom: 18,
+      transform: dirRef.current < 0 ? 'scaleX(-1)' : 'scaleX(1)',
+      imageRendering: 'pixelated', zIndex: 5,
+    }}>
+      <PixelArt pixels={sprite} scale={SCALE} />
+    </div>
+  );
+}
+
+// ─── Income pop ───────────────────────────────────────────────────────────────
+function IncomePop({ x, y, text }) {
+  return (
+    <div className="absolute pointer-events-none font-mono font-bold text-green-400" style={{
+      left: x, bottom: y, fontSize: 9, zIndex: 20, whiteSpace: 'nowrap',
+      animation: 'incomeFloat 1.4s ease-out forwards',
+      textShadow: '0 0 6px #4ade80',
+    }}>{text}</div>
+  );
+}
+
+// ─── Building cell — 1 sprite scaled to fill colSpan tiles ───────────────────
+function BuildingCell({ slot, colSpan, cellW }) {
+  const def = REAL_ASSETS.find(a => a.id === slot.assetId);
+  const sprite = BUILDING_SPRITES[slot.assetId];
+  const npcTypes = (ASSET_NPCS[slot.assetId] || ['person']).slice(0, Math.min(colSpan + 1, 4));
+  const [pops, setPops] = useState([]);
+  const width = cellW * colSpan;
+  // Fixed scale per landCost — larger buildings use scale 2, small ones scale 3
+  const spriteScale = colSpan >= 3 ? 2 : colSpan >= 2 ? 2 : 3;
+
+  const income = def?.incomePerSec
+    ? def.incomePerSec * Math.pow(def.levelMultiplier, (slot.level ?? 1) - 1)
+    : 0;
+
+  useEffect(() => {
+    if (!income) return;
+    const iv = setInterval(() => {
+      const id = Date.now() + Math.random();
+      const display = income >= 1e6
+        ? `+${(income / 1e6).toFixed(1)}jt/s`
+        : income >= 1000
+        ? `+${(income / 1000).toFixed(1)}k/s`
+        : `+${Math.floor(income)}/s`;
+      setPops(p => [...p, { id, x: 8 + Math.random() * Math.max(width - 20, 10), y: 45 + Math.random() * 25, text: display }]);
+      setTimeout(() => setPops(p => p.filter(pop => pop.id !== id)), 1400);
+    }, Math.max(800, 2500 / colSpan));
+    return () => clearInterval(iv);
+  }, [income, colSpan, width]);
+
+  if (!def) return null;
+
+  return (
+    <div className="relative overflow-hidden" style={{ width, height: TILE_H, flexShrink: 0 }}>
+      {/* Sky */}
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)',
+      }} />
+      {/* Ground — styled per asset type */}
+      {(() => {
+        const g = ASSET_GROUND[slot.assetId] || { bg: '#3d2b1f', stripe: '#4a3525' };
+        return (
+          <div className="absolute bottom-0 left-0 right-0 h-5" style={{
+            background: `repeating-linear-gradient(90deg, ${g.bg} 0px, ${g.bg} 3px, ${g.stripe} 3px, ${g.stripe} 6px)`,
+          }} />
+        );
+      })()}
+
+      {/* Single building sprite, scaled proportionally */}
+      {sprite ? (
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2" style={{ imageRendering: 'pixelated' }}>
+          <PixelArt pixels={sprite} scale={spriteScale} />
+        </div>
+      ) : (
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2"
+          style={{ fontSize: 16 + colSpan * 8 }}>
+          {def.icon}
+        </div>
+      )}
+
+      {/* Environment props */}
+      {(ASSET_ENV[slot.assetId] || []).map((env, i) => {
+        const envSprite = ENV_SPRITES[env.sprite];
+        if (!envSprite) return null;
+        return (
+          <div key={i} className="absolute pointer-events-none" style={{
+            left: `${env.x}%`,
+            bottom: env.bottom,
+            imageRendering: 'pixelated',
+            zIndex: 6,
+          }}>
+            <PixelArt pixels={envSprite} scale={env.scale} />
+          </div>
+        );
+      })}
+
+      {/* Name + level */}
+      <div className="absolute top-1 left-1 right-1 flex items-center justify-between z-10">
+        <span className="font-mono text-amber-400 truncate" style={{ fontSize: 7, textShadow: '0 0 4px #000' }}>
+          {def.name.toUpperCase()}
+        </span>
+        {(slot.level ?? 1) > 1 && (
+          <span className="font-mono text-yellow-400 ml-1 shrink-0" style={{ fontSize: 7 }}>Lv.{slot.level}</span>
+        )}
+      </div>
+
+      {/* Qty badge */}
+      {(slot.qty ?? 1) > 1 && (
+        <div className="absolute top-5 left-1 z-10 border border-amber-400/50 text-amber-400 font-mono rounded px-1"
+          style={{ fontSize: 7 }}>x{slot.qty}</div>
+      )}
+
+      {/* NPCs spread across full width */}
+      {npcTypes.map((type, i) => (
+        <WalkingNPC key={i} type={type}
+          startX={Math.floor((i + 0.5) * (width / npcTypes.length))}
+          speed={0.5 + i * 0.2}
+          width={width}
+          flip={i % 2 === 1} />
+      ))}
+
+      {/* Income pops */}
+      {pops.map(pop => <IncomePop key={pop.id} x={pop.x} y={pop.y} text={pop.text} />)}
+
+      {/* Right border */}
+      <div className="absolute top-0 bottom-0 right-0 w-px bg-zinc-600/40" />
+    </div>
+  );
+}
+
+// ─── Empty remainder cell ─────────────────────────────────────────────────────
+function EmptyCell({ width }) {
+  return (
+    <div className="relative overflow-hidden" style={{ width, height: TILE_H, flexShrink: 0 }}>
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(to bottom, #0a1a0a 0%, #0a1a0a 35%, #1a2e0a 35%)',
+      }} />
+      {/* Grass ground */}
+      <div className="absolute bottom-0 left-0 right-0 h-5" style={{
+        background: 'repeating-linear-gradient(90deg, #2d4a1f 0px, #2d4a1f 4px, #3a5a28 4px, #3a5a28 8px)',
+      }} />
+      {/* Random trees/bushes on empty land */}
+      <div className="absolute pointer-events-none" style={{ left: '15%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
+        <PixelArt pixels={ENV_SPRITES.tree_small} scale={2} />
+      </div>
+      <div className="absolute pointer-events-none" style={{ left: '55%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
+        <PixelArt pixels={ENV_SPRITES.bush} scale={2} />
+      </div>
+      <div className="absolute pointer-events-none" style={{ left: '75%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
+        <PixelArt pixels={ENV_SPRITES.tree_small} scale={2} />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-mono text-green-900/50" style={{ fontSize: 8 }}>KOSONG</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── One plot row ─────────────────────────────────────────────────────────────
+function PlotRow({ plot, plotIndex, containerW }) {
+  const cellW = containerW / TILE_COLS;
+
+  // Calculate how many cols are used by buildings
+  const usedCols = plot.slots.reduce((sum, s) => {
+    const def = REAL_ASSETS.find(a => a.id === s.assetId);
+    return sum + (def?.landCost ?? 1);
+  }, 0);  const emptyCols = Math.max(0, TILE_COLS - usedCols);
+
+  const plotIncome = plot.slots.reduce((sum, s) => {
+    const def = REAL_ASSETS.find(a => a.id === s.assetId);
+    if (!def?.incomePerSec) return sum;
+    return sum + def.incomePerSec * Math.pow(def.levelMultiplier, (s.level ?? 1) - 1);
+  }, 0);
+
+  const fmt = n => n >= 1e6 ? `${(n/1e6).toFixed(1)}jt` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : Math.floor(n);
+
+  return (
+    <div className="flex flex-col">
+      {/* Label bar */}
+      <div className="flex items-center justify-between px-2 py-0.5 bg-zinc-900 border-b border-zinc-700">
+        <span className="font-mono text-amber-400/70" style={{ fontSize: 8 }}>🟫 KAVLING #{plotIndex + 1}</span>
+        {plotIncome > 0 && (
+          <span className="font-mono text-green-400" style={{ fontSize: 8 }}>+{fmt(plotIncome)}/s</span>
+        )}
+      </div>
+
+      {/* Row: buildings fill exact proportional width, empty fills rest */}
+      <div className="flex w-full border-b border-zinc-700">
+        {plot.slots.map((slot, i) => {
+          const def = REAL_ASSETS.find(a => a.id === slot.assetId);
+          const span = def?.landCost ?? 1;
+          return <BuildingCell key={i} slot={slot} colSpan={span} cellW={cellW} />;
+        })}
+        {emptyCols > 0 && <EmptyCell width={cellW * emptyCols} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Non-land assets (kendaraan, gaya hidup) ──────────────────────────────────
+function FloatingRow({ entries, containerW }) {
+  const cellW = containerW / TILE_COLS;
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center px-2 py-0.5 bg-zinc-900 border-b border-zinc-700">
+        <span className="font-mono text-cyan-400/70" style={{ fontSize: 8 }}>🚗 ASET BERGERAK</span>
+      </div>
+      <div className="flex flex-wrap w-full border-b border-zinc-700">
+        {entries.map(([id, data]) => {
+          const def = REAL_ASSETS.find(a => a.id === id);
+          if (!def) return null;
+          const sprite = BUILDING_SPRITES[id];
+          const npcTypes = (ASSET_NPCS[id] || ['person']).slice(0, 2);
+          return (
+            <div key={id} className="relative overflow-hidden" style={{ width: cellW, height: TILE_H, flexShrink: 0 }}>
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)' }} />
+              <div className="absolute bottom-0 left-0 right-0 h-5" style={{
+                background: 'repeating-linear-gradient(90deg, #3d2b1f 0px, #3d2b1f 3px, #4a3525 3px, #4a3525 6px)',
+              }} />
+              {sprite
+                ? <div className="absolute bottom-5 left-1/2 -translate-x-1/2" style={{ imageRendering: 'pixelated' }}><PixelArt pixels={sprite} scale={SCALE} /></div>
+                : <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-2xl">{def.icon}</div>
+              }
+              <div className="absolute top-1 left-1 z-10 font-mono text-cyan-400 truncate" style={{ fontSize: 7 }}>{def.name.toUpperCase()}</div>
+              {(data.qty ?? 1) > 1 && (
+                <div className="absolute top-5 left-1 z-10 border border-cyan-400/50 text-cyan-400 font-mono rounded px-1" style={{ fontSize: 7 }}>x{data.qty}</div>
+              )}
+              {npcTypes.map((type, i) => (
+                <WalkingNPC key={i} type={type} startX={5 + i * 40} speed={0.6 + i * 0.2} width={cellW} flip={i % 2 === 1} />
+              ))}
+              <div className="absolute top-0 bottom-0 right-0 w-px bg-zinc-600/40" />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+export default function EmpireScene() {
+  const { plots, realAssets, getPassiveIncome } = useGameStore();
+  const containerRef = useRef(null);
+  const [containerW, setContainerW] = useState(600);
+  const totalIncome = getPassiveIncome();
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(e => setContainerW(e[0].contentRect.width));
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const nonLandEntries = Object.entries(realAssets).filter(([id]) => {
+    const def = REAL_ASSETS.find(a => a.id === id);
+    return def && def.landCost === 0;
+  });
+
+  const fmt = n => n >= 1e6 ? `${(n/1e6).toFixed(1)}jt` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : Math.floor(n);
+
+  if (plots.length === 0 && nonLandEntries.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center border border-zinc-800 rounded-lg bg-zinc-950 font-mono py-8">
+        <div className="text-4xl mb-2">🏚️</div>
+        <div className="text-zinc-500 text-xs text-center px-4">
+          Empire masih kosong.<br />Beli kavling tanah di tab 🌏 WORLD!
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between font-mono">
+        <span className="text-amber-400 text-xs tracking-widest">▶ EMPIRE LIVE</span>
+        <span className="text-green-400 text-xs">+{fmt(totalIncome)} Rp/s</span>
+      </div>
+
+      <div ref={containerRef} className="rounded-lg border border-zinc-700 overflow-hidden">
+        {plots.map((plot, i) => (
+          <PlotRow key={plot.id} plot={plot} plotIndex={i} containerW={containerW} />
+        ))}
+        <FloatingRow entries={nonLandEntries} containerW={containerW} />
+      </div>
+
+      <style>{`
+        @keyframes incomeFloat {
+          0%   { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-28px); }
+        }
+      `}</style>
+    </div>
+  );
+}
