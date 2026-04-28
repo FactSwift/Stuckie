@@ -7,6 +7,42 @@ const SCALE = 3;
 const TILE_COLS = 6;
 const TILE_H = 200;
 
+// ─── Time of day system ───────────────────────────────────────────────────────
+const TIME_MODES = [
+  {
+    id: 'pagi',
+    label: '🌅 Pagi',
+    // Sky: warm orange-pink sunrise
+    sky: 'linear-gradient(to bottom, #1a0a2e 0%, #6b2d6b 20%, #e8734a 50%, #f5a623 75%, #ffd89b 100%)',
+    // Ground tint
+    groundLight: 'rgba(255,180,80,0.08)',
+  },
+  {
+    id: 'siang',
+    label: '☀️ Siang',
+    sky: 'linear-gradient(to bottom, #0a4a8a 0%, #1a6fc4 25%, #3a9fd8 55%, #7ec8e3 80%, #b8e4f0 100%)',
+    groundLight: 'rgba(255,255,200,0.06)',
+  },
+  {
+    id: 'sore',
+    label: '🌇 Sore',
+    sky: 'linear-gradient(to bottom, #0d1b4b 0%, #2d3a8c 20%, #c0392b 45%, #e67e22 65%, #f39c12 80%, #f9ca24 100%)',
+    groundLight: 'rgba(255,120,40,0.1)',
+  },
+  {
+    id: 'malam',
+    label: '🌙 Malam',
+    sky: 'linear-gradient(to bottom, #000005 0%, #05051a 25%, #0a0a2e 55%, #0d0d3a 80%, #1a0d00 100%)',
+    groundLight: 'rgba(30,30,80,0.15)',
+  },
+];
+
+// Auto-cycle every 3 minutes (180s game time)
+function useTimeOfDay(gameTime) {
+  const idx = Math.floor(gameTime / 180) % TIME_MODES.length;
+  return TIME_MODES[idx];
+}
+
 const ASSET_NPCS = {
   warung:    ['cook', 'person', 'shopper'],
   cafe:      ['cook', 'shopper'],
@@ -22,8 +58,30 @@ const ASSET_NPCS = {
 
 // Building sprites that use PNG files instead of pixel art
 const BUILDING_PNG = {
-  kos:  '/sprites/kos-kosan.png',
-  mall: '/sprites/mall.png',
+  kos:       '/sprites/kos-kosan.png',
+  ruko:      '/sprites/ruko.png',
+  apartemen: '/sprites/apartemen.png',
+  mall:      '/sprites/mall.png',
+  gedung:    '/sprites/gedung perkantoran.png',
+  warung:    '/sprites/warung makan.png',
+  cafe:      '/sprites/kafe .png',
+  startup:   '/sprites/tech startup.png',
+  pabrik:    '/sprites/industri manufaktur.png',
+  bank:      '/sprites/bank.png',
+};
+
+// height = tinggi render (px), bottom = jarak dari ground strip
+const BUILDING_PNG_CONFIG = {
+  kos:       { height: 90,  bottom: 20 },
+  ruko:      { height: 100, bottom: 20 },
+  apartemen: { height: 120, bottom: 20 },
+  mall:      { height: 110, bottom: 20 },
+  gedung:    { height: 140, bottom: 20 },
+  warung:    { height: 85,  bottom: 20 },
+  cafe:      { height: 95,  bottom: 20 },
+  startup:   { height: 110, bottom: 20 },
+  pabrik:    { height: 120, bottom: 20 },
+  bank:      { height: 120, bottom: 20 },
 };
 const NPC_FRAMES = [
   '/sprites/npc/sprite_0.png',
@@ -67,7 +125,7 @@ function WalkingNPC({ type, startX, speed, width, flip }) {
   return (
     <div className="absolute pointer-events-none" style={{
       left: x,
-      bottom: 18,
+      bottom: 22,
       transform: dir > 0 ? 'scaleX(-1)' : 'scaleX(1)',
       imageRendering: 'pixelated',
       zIndex: 5,
@@ -95,7 +153,7 @@ function IncomePop({ x, y, text }) {
 }
 
 // ─── Building cell — 1 sprite scaled to fill colSpan tiles ───────────────────
-function BuildingCell({ slot, colSpan, cellW }) {
+function BuildingCell({ slot, colSpan, cellW, timeMode }) {
   const def = REAL_ASSETS.find(a => a.id === slot.assetId);
   const sprite = BUILDING_SPRITES[slot.assetId];
   const npcTypes = (ASSET_NPCS[slot.assetId] || ['person']).slice(0, Math.min(colSpan + 1, 4));
@@ -129,42 +187,44 @@ function BuildingCell({ slot, colSpan, cellW }) {
       {/* Background — clipped to tile */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{
-          background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)',
+          background: timeMode.sky,
+          transition: 'background 2s ease',
         }} />
+        {/* Ambient light overlay */}
+        <div className="absolute inset-0" style={{ background: timeMode.groundLight }} />
       </div>
 
-      {/* Ground — styled per asset type */}
-      {(() => {
-        const g = ASSET_GROUND[slot.assetId] || { bg: '#3d2b1f', stripe: '#4a3525' };
-        return (
-          <div className="absolute bottom-0 left-0 right-0 h-5" style={{
-            background: `repeating-linear-gradient(90deg, ${g.bg} 0px, ${g.bg} 3px, ${g.stripe} 3px, ${g.stripe} 6px)`,
-          }} />
-        );
-      })()}
+      {/* Ground — road (top thin) + soil (bottom thick) with gradients */}
+      {/* Soil layer — tebal, coklat */}
+      <div className="absolute bottom-0 left-0 right-0" style={{
+        height: 14,
+        background: 'linear-gradient(to bottom, #5c3d1e 0%, #4a2e12 40%, #3a2208 100%)',
+        boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.4)',
+      }} />
+      {/* Road layer — tipis, abu-abu di atas tanah */}
+      <div className="absolute left-0 right-0" style={{
+        bottom: 14,
+        height: 8,
+        background: 'linear-gradient(to bottom, #888888 0%, #6b6b6b 50%, #555555 100%)',
+        boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.3)',
+      }} />
 
       {/* Building sprite — overflows upward if taller than TILE_H */}
       {BUILDING_PNG[slot.assetId] ? (
-        <div style={{
-          position: 'absolute',
-          left: 0, right: 0,
-          bottom: 20,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-        }}>
-          <img
-            src={BUILDING_PNG[slot.assetId]}
-            alt={slot.assetId}
-            style={{
-              imageRendering: 'pixelated',
-              width: slot.assetId === 'kos' ? 'auto' : '100%',
-              height: slot.assetId === 'kos' ? TILE_H - 25 : 'auto',
-              maxHeight: TILE_H - 20,
-              display: 'block',
-            }}
-          />
-        </div>
+        <img
+          src={BUILDING_PNG[slot.assetId]}
+          alt={slot.assetId}
+          style={{
+            position: 'absolute',
+            bottom: 22,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            imageRendering: 'pixelated',
+            height: BUILDING_PNG_CONFIG[slot.assetId]?.height ?? 100,
+            width: 'auto',
+            display: 'block',
+          }}
+        />
       ) : sprite ? (
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2" style={{ imageRendering: 'pixelated' }}>
           <PixelArt pixels={sprite} scale={spriteScale} />
@@ -176,8 +236,23 @@ function BuildingCell({ slot, colSpan, cellW }) {
         </div>
       )}
 
-      {/* Environment props */}
+      {/* Environment props — placed at edges to avoid overlapping building */}
       {(ASSET_ENV[slot.assetId] || []).map((env, i) => {
+        const isTree = env.sprite === 'tree_small' || env.sprite === 'tree_big';
+        const isLamp = env.sprite === 'street_lamp';
+        if (isTree || isLamp) {
+          const src = isTree ? '/sprites/tree.png' : '/sprites/street lamp.png';
+          return (
+            <div key={i} className="absolute pointer-events-none" style={{
+              left: `${env.x}%`,
+              bottom: env.bottom,
+              zIndex: 6,
+            }}>
+              <img src={src} alt={env.sprite}
+                style={{ imageRendering: 'pixelated', height: env.scale * 10, width: 'auto', display: 'block' }} />
+            </div>
+          );
+        }
         const envSprite = ENV_SPRITES[env.sprite];
         if (!envSprite) return null;
         return (
@@ -213,42 +288,30 @@ function BuildingCell({ slot, colSpan, cellW }) {
 
       {/* Income pops */}
       {pops.map(pop => <IncomePop key={pop.id} x={pop.x} y={pop.y} text={pop.text} />)}
-
-      {/* Right border */}
-      <div className="absolute top-0 bottom-0 right-0 w-px bg-zinc-600/40" />
     </div>  );
 }
 
 // ─── Empty remainder cell ─────────────────────────────────────────────────────
-function EmptyCell({ width }) {
+function EmptyCell({ width, timeMode }) {
   return (
     <div className="relative overflow-hidden" style={{ width, height: TILE_H, flexShrink: 0 }}>
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(to bottom, #0a1a0a 0%, #0a1a0a 35%, #1a2e0a 35%)',
+        background: timeMode.sky,
+        transition: 'background 2s ease',
       }} />
       {/* Grass ground */}
-      <div className="absolute bottom-0 left-0 right-0 h-5" style={{
-        background: 'repeating-linear-gradient(90deg, #2d4a1f 0px, #2d4a1f 4px, #3a5a28 4px, #3a5a28 8px)',
+      {/* Soil only — no road for empty land */}
+      <div className="absolute bottom-0 left-0 right-0" style={{
+        height: 22,
+        background: 'linear-gradient(to bottom, #6b4c2a 0%, #5c3d1e 40%, #3a2208 100%)',
+        boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.4)',
       }} />
-      {/* Random trees/bushes on empty land */}
-      <div className="absolute pointer-events-none" style={{ left: '15%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
-        <PixelArt pixels={ENV_SPRITES.tree_small} scale={2} />
-      </div>
-      <div className="absolute pointer-events-none" style={{ left: '55%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
-        <PixelArt pixels={ENV_SPRITES.bush} scale={2} />
-      </div>
-      <div className="absolute pointer-events-none" style={{ left: '75%', bottom: 20, imageRendering: 'pixelated', zIndex: 4 }}>
-        <PixelArt pixels={ENV_SPRITES.tree_small} scale={2} />
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="font-mono text-green-900/50" style={{ fontSize: 8 }}>KOSONG</span>
-      </div>
     </div>
   );
 }
 
 // ─── One plot row ─────────────────────────────────────────────────────────────
-function PlotRow({ plot, plotIndex, containerW }) {
+function PlotRow({ plot, plotIndex, containerW, timeMode }) {
   const cellW = containerW / TILE_COLS;
 
   // Calculate how many cols are used by buildings
@@ -280,9 +343,9 @@ function PlotRow({ plot, plotIndex, containerW }) {
         {plot.slots.map((slot, i) => {
           const def = REAL_ASSETS.find(a => a.id === slot.assetId);
           const span = def?.landCost ?? 1;
-          return <BuildingCell key={i} slot={slot} colSpan={span} cellW={cellW} />;
+          return <BuildingCell key={i} slot={slot} colSpan={span} cellW={cellW} timeMode={timeMode} />;
         })}
-        {emptyCols > 0 && <EmptyCell width={cellW * emptyCols} />}
+        {emptyCols > 0 && <EmptyCell width={cellW * emptyCols} timeMode={timeMode} />}
       </div>    </div>
   );
 }
@@ -306,8 +369,13 @@ function FloatingRow({ entries, containerW }) {
           return (
             <div key={id} className="relative overflow-hidden" style={{ width: cellW, height: TILE_H, flexShrink: 0 }}>
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)' }} />
-              <div className="absolute bottom-0 left-0 right-0 h-5" style={{
-                background: 'repeating-linear-gradient(90deg, #3d2b1f 0px, #3d2b1f 3px, #4a3525 3px, #4a3525 6px)',
+              <div className="absolute bottom-0 left-0 right-0" style={{
+                height: 14,
+                background: 'linear-gradient(to bottom, #5c3d1e 0%, #4a2e12 40%, #3a2208 100%)',
+              }} />
+              <div className="absolute left-0 right-0" style={{
+                bottom: 14, height: 8,
+                background: 'linear-gradient(to bottom, #888888 0%, #6b6b6b 50%, #555555 100%)',
               }} />
               {sprite
                 ? <div className="absolute bottom-5 left-1/2 -translate-x-1/2" style={{ imageRendering: 'pixelated' }}><PixelArt pixels={sprite} scale={SCALE} /></div>
@@ -331,10 +399,11 @@ function FloatingRow({ entries, containerW }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function EmpireScene() {
-  const { plots, realAssets, getPassiveIncome } = useGameStore();
+  const { plots, realAssets, getPassiveIncome, gameTime } = useGameStore();
   const containerRef = useRef(null);
   const [containerW, setContainerW] = useState(600);
   const totalIncome = getPassiveIncome();
+  const timeMode = useTimeOfDay(gameTime);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -365,12 +434,15 @@ export default function EmpireScene() {
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between font-mono">
         <span className="text-amber-400 text-xs tracking-widest">▶ EMPIRE LIVE</span>
-        <span className="text-green-400 text-xs">+{fmt(totalIncome)} Rp/s</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-400">{timeMode.label}</span>
+          <span className="text-green-400 text-xs">+{fmt(totalIncome)} Rp/s</span>
+        </div>
       </div>
 
       <div ref={containerRef} className="rounded-lg border border-zinc-700 overflow-hidden">
         {plots.map((plot, i) => (
-          <PlotRow key={plot.id} plot={plot} plotIndex={i} containerW={containerW} />
+          <PlotRow key={plot.id} plot={plot} plotIndex={i} containerW={containerW} timeMode={timeMode} />
         ))}
         <FloatingRow entries={nonLandEntries} containerW={containerW} />
       </div>
