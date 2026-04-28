@@ -39,11 +39,12 @@ export function PixelArt({ pixels, scale = PIXEL_SIZE, style = {} }) {
 // ─── Color Palette ────────────────────────────────────────────────────────────
 export const PALETTE = {
   // Skin tones
-  's': '#f4a460', // skin
+  's': '#f4c99a', // skin peach (lighter, matches reference)
   'S': '#d2691e', // dark skin
   // Hair
   'h': '#4a2800', // dark brown hair
   'H': '#8b4513', // brown hair
+  'R': '#c0392b', // red-brown hair (reference character)
   'y': '#ffd700', // blonde
   'w': '#ffffff', // white
   // Clothes
@@ -84,125 +85,188 @@ export const PALETTE = {
   '4': '#ffffaa', // light yellow
 };
 
-// ─── NPC Sprites (16px tall, walking cycle) ───────────────────────────────────
+// ─── NPC Sprites (pixel art walk cycle — recreated from reference) ────────────
 
-// Frame 1 & 2 for walk cycle
 export const NPC_SPRITES = {
-  // Generic person - frame1 (left foot forward)
+  // Frame 1 — kaki kiri maju
   person_f1: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.bbb.
-XbbbX
-XbbbX
-.b.b.
-.X.X.
+....RRRR..
+...RRRRRRR
+....ssss..
+....sXs...
+...XwwwX..
+..XwwwwX..
+...XwwX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
-  // Generic person - frame2 (right foot forward)
+  // Frame 2 — kaki kanan maju
   person_f2: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.bbb.
-XbbbX
-XbbbX
-.b.b.
-X.X..
+....RRRR..
+...RRRRRRR
+....ssss..
+....sXs...
+...XwwwX..
+..XwwwwX..
+...XwwX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Cook (white hat)
+  // Frame 3 — badan condong (mid-stride)
+  person_f3: `
+...RRRR...
+..RRRRRRR.
+...ssss...
+...sXs....
+..XwwwX...
+.XwwwwX...
+..XwwX....
+...KKK....
+..bbbK....
+..bbb.....
+..bKb.....
+.KK..K....
+`,
+  // Frame 4 — kaki kanan maju balik
+  person_f4: `
+...RRRR...
+..RRRRRRR.
+...ssss...
+...sXs....
+..XwwwX...
+.XwwwwX...
+..XwwX....
+...KKK....
+..KbKb....
+...bbb....
+...bKb....
+...K.KK...
+`,
+
+  // Cook — rambut putih, apron
   cook_f1: `
-.www.
-XwwwX
-XsssX
-.XsX.
-.rrr.
-XrrrX
-XrrrX
-.r.r.
-.X.X.
+....wwww..
+...wwwwwww
+....ssss..
+....sXs...
+...XrrrX..
+..XrrrrX..
+...XrrX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   cook_f2: `
-.www.
-XwwwX
-XsssX
-.XsX.
-.rrr.
-XrrrX
-XrrrX
-.r.r.
-X.X..
+....wwww..
+...wwwwwww
+....ssss..
+....sXs...
+...XrrrX..
+..XrrrrX..
+...XrrX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Business person (suit)
+
+  // Exec — rambut hitam, jas hitam
   exec_f1: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.KKK.
-XKKKX
-XKKKX
-.K.K.
-.X.X.
+....KKKK..
+...KKKKKKK
+....ssss..
+....sXs...
+...XKKKX..
+..XKKKKX..
+...XKKX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   exec_f2: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.KKK.
-XKKKX
-XKKKX
-.K.K.
-X.X..
+....KKKK..
+...KKKKKKK
+....ssss..
+....sXs...
+...XKKKX..
+..XKKKKX..
+...XKKX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Worker (hard hat)
+
+  // Worker — helm kuning
   worker_f1: `
-.YYY.
-XYYyX
-XsssX
-.XsX.
-.nnn.
-XnnnX
-XnnnX
-.n.n.
-.X.X.
+...YYYYY..
+..YYYYYYs.
+....ssss..
+....sXs...
+...XnnnX..
+..XnnnnX..
+...XnnX...
+....KK....
+...nnnK...
+...nnn....
+...nKn....
+..KK.K....
 `,
   worker_f2: `
-.YYY.
-XYYyX
-XsssX
-.XsX.
-.nnn.
-XnnnX
-XnnnX
-.n.n.
-X.X..
+...YYYYY..
+..YYYYYYs.
+....ssss..
+....sXs...
+...XnnnX..
+..XnnnnX..
+...XnnX...
+....KK....
+...KnKn...
+....nnn...
+....nKn...
+....K.KK..
 `,
-  // Shopper (bag)
+
+  // Shopper — rambut kuning, baju pink
   shopper_f1: `
-.XXX.
-XsssX
-XsssX
-.XyX.
-.ppp.
-XpppX
-XpppX
-.p.p.
-.X.X.
+....yyyy..
+...yyyyyyy
+....ssss..
+....sXs...
+...X1111X.
+..X11111X.
+...X11X...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   shopper_f2: `
-.XXX.
-XsssX
-XsssX
-.XyX.
-.ppp.
-XpppX
-XpppX
-.p.p.
-X.X..
+....yyyy..
+...yyyyyyy
+....ssss..
+....sXs...
+...X1111X.
+..X11111X.
+...X11X...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
 };
 

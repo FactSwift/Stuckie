@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { useGameStore, REAL_ASSETS } from '@/store/gameStore';
-import { PixelArt, NPC_SPRITES, BUILDING_SPRITES, ENV_SPRITES, ASSET_ENV, ASSET_GROUND } from './PixelSprites';
+import { PixelArt, BUILDING_SPRITES, ENV_SPRITES, ASSET_ENV, ASSET_GROUND } from '../sprites/PixelSprites';
 
-const SCALE = 2;
+const SCALE = 3;
 const TILE_COLS = 6;
 const TILE_H = 200;
 
@@ -20,18 +20,32 @@ const ASSET_NPCS = {
   bank:      ['exec', 'shopper', 'person'],
 };
 
+// Building sprites that use PNG files instead of pixel art
+const BUILDING_PNG = {
+  kos:  '/sprites/kos-kosan.png',
+  mall: '/sprites/mall.png',
+};
+const NPC_FRAMES = [
+  '/sprites/npc/sprite_0.png',
+  '/sprites/npc/sprite_1.png',
+  '/sprites/npc/sprite_2.png',
+  '/sprites/npc/sprite_3.png',
+];
+
+// All NPC types use the same sprite sheet (same character)
 const NPC_TYPE_MAP = {
-  cook:    ['cook_f1',    'cook_f2'],
-  exec:    ['exec_f1',    'exec_f2'],
-  worker:  ['worker_f1',  'worker_f2'],
-  shopper: ['shopper_f1', 'shopper_f2'],
-  person:  ['person_f1',  'person_f2'],
+  cook:    [0, 1, 2, 3],
+  exec:    [0, 1, 2, 3],
+  worker:  [0, 1, 2, 3],
+  shopper: [0, 1, 2, 3],
+  person:  [0, 1, 2, 3],
 };
 
 // ─── Walking NPC ──────────────────────────────────────────────────────────────
 function WalkingNPC({ type, startX, speed, width, flip }) {
   const [x, setX] = useState(startX);
   const [frame, setFrame] = useState(0);
+  const [dir, setDir] = useState(flip ? -1 : 1);
   const xRef = useRef(startX);
   const dirRef = useRef(flip ? -1 : 1);
 
@@ -43,21 +57,28 @@ function WalkingNPC({ type, startX, speed, width, flip }) {
       else if (xRef.current < -10) xRef.current = width + 10;
       setX(xRef.current);
     }, 50);
-    const anim = setInterval(() => setFrame(f => (f + 1) % frames.length), 200);
+    const anim = setInterval(() => setFrame(f => (f + 1) % frames.length), 150);
     return () => { clearInterval(move); clearInterval(anim); };
   }, [type, speed, width]);
 
   const frames = NPC_TYPE_MAP[type] || NPC_TYPE_MAP.person;
-  const sprite = NPC_SPRITES[frames[frame]];
-  if (!sprite) return null;
+  const frameIdx = frames[frame];
 
   return (
     <div className="absolute pointer-events-none" style={{
-      left: x, bottom: 18,
-      transform: dirRef.current < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-      imageRendering: 'pixelated', zIndex: 5,
+      left: x,
+      bottom: 18,
+      transform: dir > 0 ? 'scaleX(-1)' : 'scaleX(1)',
+      imageRendering: 'pixelated',
+      zIndex: 5,
     }}>
-      <PixelArt pixels={sprite} scale={SCALE} />
+      <img
+        src={NPC_FRAMES[frameIdx]}
+        alt=""
+        width={24}
+        height={32}
+        style={{ imageRendering: 'pixelated', display: 'block' }}
+      />
     </div>
   );
 }
@@ -80,7 +101,6 @@ function BuildingCell({ slot, colSpan, cellW }) {
   const npcTypes = (ASSET_NPCS[slot.assetId] || ['person']).slice(0, Math.min(colSpan + 1, 4));
   const [pops, setPops] = useState([]);
   const width = cellW * colSpan;
-  // Fixed scale per landCost — larger buildings use scale 2, small ones scale 3
   const spriteScale = colSpan >= 3 ? 2 : colSpan >= 2 ? 2 : 3;
 
   const income = def?.incomePerSec
@@ -105,11 +125,14 @@ function BuildingCell({ slot, colSpan, cellW }) {
   if (!def) return null;
 
   return (
-    <div className="relative overflow-hidden" style={{ width, height: TILE_H, flexShrink: 0 }}>
-      {/* Sky */}
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)',
-      }} />
+    <div className="relative" style={{ width, height: TILE_H, flexShrink: 0, overflow: 'visible' }}>
+      {/* Background — clipped to tile */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to bottom, #0a0a1a 0%, #0a0a1a 35%, #1a0d00 35%)',
+        }} />
+      </div>
+
       {/* Ground — styled per asset type */}
       {(() => {
         const g = ASSET_GROUND[slot.assetId] || { bg: '#3d2b1f', stripe: '#4a3525' };
@@ -120,8 +143,29 @@ function BuildingCell({ slot, colSpan, cellW }) {
         );
       })()}
 
-      {/* Single building sprite, scaled proportionally */}
-      {sprite ? (
+      {/* Building sprite — overflows upward if taller than TILE_H */}
+      {BUILDING_PNG[slot.assetId] ? (
+        <div style={{
+          position: 'absolute',
+          left: 0, right: 0,
+          bottom: 20,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}>
+          <img
+            src={BUILDING_PNG[slot.assetId]}
+            alt={slot.assetId}
+            style={{
+              imageRendering: 'pixelated',
+              width: slot.assetId === 'kos' ? 'auto' : '100%',
+              height: slot.assetId === 'kos' ? TILE_H - 25 : 'auto',
+              maxHeight: TILE_H - 20,
+              display: 'block',
+            }}
+          />
+        </div>
+      ) : sprite ? (
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2" style={{ imageRendering: 'pixelated' }}>
           <PixelArt pixels={sprite} scale={spriteScale} />
         </div>
@@ -158,13 +202,7 @@ function BuildingCell({ slot, colSpan, cellW }) {
         )}
       </div>
 
-      {/* Qty badge */}
-      {(slot.qty ?? 1) > 1 && (
-        <div className="absolute top-5 left-1 z-10 border border-amber-400/50 text-amber-400 font-mono rounded px-1"
-          style={{ fontSize: 7 }}>x{slot.qty}</div>
-      )}
-
-      {/* NPCs spread across full width */}
+      {/* NPCs */}
       {npcTypes.map((type, i) => (
         <WalkingNPC key={i} type={type}
           startX={Math.floor((i + 0.5) * (width / npcTypes.length))}
@@ -178,8 +216,7 @@ function BuildingCell({ slot, colSpan, cellW }) {
 
       {/* Right border */}
       <div className="absolute top-0 bottom-0 right-0 w-px bg-zinc-600/40" />
-    </div>
-  );
+    </div>  );
 }
 
 // ─── Empty remainder cell ─────────────────────────────────────────────────────
@@ -246,8 +283,7 @@ function PlotRow({ plot, plotIndex, containerW }) {
           return <BuildingCell key={i} slot={slot} colSpan={span} cellW={cellW} />;
         })}
         {emptyCols > 0 && <EmptyCell width={cellW * emptyCols} />}
-      </div>
-    </div>
+      </div>    </div>
   );
 }
 
