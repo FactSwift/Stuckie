@@ -184,13 +184,13 @@ const NEWS_POOL = [
 ];
 
 export const PRESTIGE_TITLES = [
-  { min: 0,             title: 'Anak Kos Bokek',     icon: '😅' },
-  { min: 15000000,      title: 'Karyawan Rajin',      icon: '💼' },
-  { min: 100000000,     title: 'Investor Pemula',     icon: '📈' },
-  { min: 1000000000,    title: 'Pengusaha Muda',      icon: '🚀' },
-  { min: 10000000000,   title: 'Konglomerat Lokal',   icon: '�' },
+  { min: 0,             title: 'Anak Kos Bokek',     icon: '🥉' },
+  { min: 15000000,      title: 'Karyawan Rajin',      icon: '🥈' },
+  { min: 100000000,     title: 'Investor Pemula',     icon: '🥇' },
+  { min: 1000000000,    title: 'Pengusaha Muda',      icon: '🏅' },
+  { min: 10000000000,   title: 'Konglomerat Lokal',   icon: '💎' },
   { min: 100000000000,  title: 'Taipan Nusantara',    icon: '👑' },
-  { min: 1000000000000, title: 'FINANCIAL EMPEROR',   icon: '�' },
+  { min: 1000000000000, title: 'FINANCIAL EMPEROR',   icon: '🌏' },
 ];
 
 export const SAVE_KEY_PREFIX = 'stuckie_save_';

@@ -5,7 +5,7 @@ import { PixelArt, BUILDING_SPRITES, ENV_SPRITES, ASSET_ENV, ASSET_GROUND } from
 
 const SCALE = 3;
 const TILE_COLS = 6;
-const TILE_H = 200;
+const TILE_H = 160;
 
 // ─── Time of day system ───────────────────────────────────────────────────────
 const TIME_MODES = [
@@ -72,16 +72,16 @@ const BUILDING_PNG = {
 
 // height = tinggi render (px), bottom = jarak dari ground strip
 const BUILDING_PNG_CONFIG = {
-  kos:       { height: 90,  bottom: 20 },
-  ruko:      { height: 100, bottom: 20 },
-  apartemen: { height: 120, bottom: 20 },
-  mall:      { height: 110, bottom: 20 },
-  gedung:    { height: 140, bottom: 20 },
-  warung:    { height: 85,  bottom: 20 },
-  cafe:      { height: 95,  bottom: 20 },
-  startup:   { height: 110, bottom: 20 },
-  pabrik:    { height: 120, bottom: 20 },
-  bank:      { height: 120, bottom: 20 },
+  kos:       { height: 75,  bottom: 22 },
+  ruko:      { height: 80,  bottom: 22 },
+  apartemen: { height: 95,  bottom: 22 },
+  mall:      { height: 88,  bottom: 22 },
+  gedung:    { height: 110, bottom: 22 },
+  warung:    { height: 68,  bottom: 22 },
+  cafe:      { height: 75,  bottom: 22 },
+  startup:   { height: 88,  bottom: 22 },
+  pabrik:    { height: 95,  bottom: 22 },
+  bank:      { height: 95,  bottom: 22 },
 };
 const NPC_FRAMES = [
   '/sprites/npc/sprite_0.png',
@@ -158,6 +158,7 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
   const sprite = BUILDING_SPRITES[slot.assetId];
   const npcTypes = (ASSET_NPCS[slot.assetId] || ['person']).slice(0, Math.min(colSpan + 1, 4));
   const [pops, setPops] = useState([]);
+  const [hovered, setHovered] = useState(false);
   const width = cellW * colSpan;
   const spriteScale = colSpan >= 3 ? 2 : colSpan >= 2 ? 2 : 3;
 
@@ -183,7 +184,11 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
   if (!def) return null;
 
   return (
-    <div className="relative" style={{ width, height: TILE_H, flexShrink: 0, overflow: 'visible' }}>
+    <div className="relative" style={{ width, height: TILE_H, flexShrink: 0, overflow: 'visible' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => setHovered(h => !h)}
+    >
       {/* Background — clipped to tile */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{
@@ -249,7 +254,7 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
               zIndex: 6,
             }}>
               <img src={src} alt={env.sprite}
-                style={{ imageRendering: 'pixelated', height: env.scale * 10, width: 'auto', display: 'block' }} />
+                style={{ imageRendering: 'pixelated', height: env.scale * 8, width: 'auto', display: 'block' }} />
             </div>
           );
         }
@@ -267,15 +272,31 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
         );
       })}
 
-      {/* Name + level */}
-      <div className="absolute top-1 left-1 right-1 flex items-center justify-between z-10">
-        <span className="font-mono text-amber-400 truncate" style={{ fontSize: 7, textShadow: '0 0 4px #000' }}>
-          {def.name.toUpperCase()}
-        </span>
-        {(slot.level ?? 1) > 1 && (
-          <span className="font-mono text-yellow-400 ml-1 shrink-0" style={{ fontSize: 7 }}>Lv.{slot.level}</span>
-        )}
-      </div>
+      {/* Hover/click popup — positioned just above the building */}
+      {hovered && (
+        <div className="absolute left-1/2 z-30 pointer-events-none font-mono"
+          style={{
+            bottom: 80,
+            transform: 'translateX(-50%)',
+            whiteSpace: 'nowrap',
+          }}>
+          <div className="border border-amber-400/70 rounded px-2 py-1.5 text-xs"
+            style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}>
+            <div className="text-amber-400 font-bold">{def.name}</div>
+            <div className="text-zinc-400 text-xs">Lv.{slot.level ?? 1}</div>
+            {income > 0 && (
+              <div className="text-green-400 text-xs">
+                +{income >= 1e6 ? `${(income/1e6).toFixed(1)}jt` : income >= 1000 ? `${(income/1000).toFixed(1)}k` : Math.floor(income)}/s
+              </div>
+            )}
+          </div>
+          <div className="w-2 h-2 mx-auto" style={{
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(245,158,11,0.7)',
+          }} />
+        </div>
+      )}
 
       {/* NPCs */}
       {npcTypes.map((type, i) => (
