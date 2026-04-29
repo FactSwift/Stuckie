@@ -1,76 +1,160 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const FAQ = [
-  {
-    q: 'Apa itu SBN?',
-    a: 'SBN (Surat Berharga Negara) = utang negara ke lo. Lo minjemin duit ke pemerintah, mereka bayar bunga (kupon) tiap bulan. Dijamin 100% sama negara, jadi basically risk-free. Cocok buat dana darurat yang mau dapet return lebih dari deposito.',
-  },
-  {
-    q: 'Saham vs Reksa Dana bedanya apa?',
-    a: 'Saham = lo beli langsung kepemilikan perusahaan. Potensi cuan gede, tapi harus riset sendiri & tahan mental kalau merah. Reksa Dana = lo titip duit ke manajer investasi profesional yang kelola portofolio. Lebih santai, tapi ada biaya pengelolaan (expense ratio).',
-  },
-  {
-    q: 'Kapan waktu terbaik beli saham?',
-    a: 'Jujur? Gak ada yang tau pasti. Tapi strategi DCA (Dollar Cost Averaging) — beli rutin tiap bulan tanpa peduli harga — terbukti efektif jangka panjang. Daripada nunggu "harga terendah" yang gak pernah ketemu, mending konsisten aja.',
-  },
-  {
-    q: 'Berapa modal minimal investasi?',
-    a: 'Reksa Dana: mulai Rp10.000 aja di beberapa platform. Saham: 1 lot = 100 lembar, jadi tergantung harga sahamnya. BBCA misalnya ~Rp950.000/lot. SBN: biasanya minimal Rp1 juta. Intinya: mulai dari yang lo mampu, yang penting mulai!',
-  },
-  {
-    q: 'Apa itu diversifikasi?',
-    a: 'Jangan taruh semua telur di satu keranjang. Spread investasi lo ke beberapa instrumen berbeda (saham, obligasi, reksa dana) supaya kalau satu sektor anjlok, yang lain bisa nahan. Rule of thumb: 60% saham, 30% obligasi, 10% cash/pasar uang.',
-  },
+  { q: 'Apa itu SBN?', },
+  { q: 'Saham vs Reksa Dana bedanya apa?' },
+  { q: 'Kapan waktu terbaik beli saham?' },
+  { q: 'Berapa modal minimal investasi?' },
+  { q: 'Apa itu diversifikasi?' },
 ];
 
 export default function AIScout() {
   const [messages, setMessages] = useState([
-    { role: 'ai', text: 'Yo! Gue AI Scout lo. Tanya apa aja soal investasi, gue jawab pake bahasa manusia. 🤖' },
+    { role: 'ai', text: 'Halo! Gue AI Scout, asisten investasi lo. Upload prospektus PDF atau tanya apa aja soal investasi! 🤖' },
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [pdfContext, setPdfContext] = useState(null);
+  const [pdfName, setPdfName] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const fileInputRef = useRef(null);
+  const chatEndRef = useRef(null);
+  const [chatHistory, setChatHistory] = useState([]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const userMsg = input.trim();
+  const scrollToBottom = () => {
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.pdf')) {
+      addAiMessage('❌ Hanya file PDF yang didukung.');
+      return;
+    }
+
+    setUploadLoading(true);
+    addAiMessage(`📄 Membaca "${file.name}"... tunggu sebentar.`);
+
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/extract-pdf', { method: 'POST', body: form });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      setPdfContext(data.text);
+      setPdfName(file.name);
+      setChatHistory([]);
+      addAiMessage(`✅ Prospektus "${file.name}" berhasil dibaca (${data.pageCount} halaman)! Sekarang lo bisa tanya apa aja tentang isinya.`);
+    } catch (err) {
+      addAiMessage(`❌ Gagal membaca PDF: ${err.message}`);
+    } finally {
+      setUploadLoading(false);
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const addAiMessage = (text) => {
+    setMessages(prev => [...prev, { role: 'ai', text }]);
+    scrollToBottom();
+  };
+
+  const handleSend = async (text) => {
+    const msg = (text || input).trim();
+    if (!msg || loading) return;
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
 
-    // Simple FAQ matching
-    const match = FAQ.find(f =>
-      f.q.toLowerCase().split(' ').some(word => userMsg.toLowerCase().includes(word))
-    );
+    const userEntry = { role: 'user', text: msg };
+    setMessages(prev => [...prev, userEntry]);
+    setLoading(true);
+    scrollToBottom();
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        role: 'ai',
-        text: match?.a || 'Hmm, pertanyaan bagus. Untuk jawaban yang lebih detail, lo butuh koneksi ke Azure OpenAI (belum disetup di prototype ini). Tapi coba tanya soal: SBN, Saham, Reksa Dana, DCA, atau Diversifikasi!',
-      }]);
-    }, 600);
+    const newHistory = [...chatHistory, { role: 'user', content: msg }];
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newHistory,
+          context: pdfContext,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      const reply = data.reply;
+      setChatHistory([...newHistory, { role: 'assistant', content: reply }]);
+      setMessages(prev => [...prev, { role: 'ai', text: reply }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'ai', text: `❌ ${err.message}` }]);
+    } finally {
+      setLoading(false);
+      scrollToBottom();
+    }
+  };
+
+  const clearPdf = () => {
+    setPdfContext(null);
+    setPdfName(null);
+    setChatHistory([]);
+    addAiMessage('🗑️ Prospektus dihapus. Sekarang gue balik ke mode umum.');
   };
 
   return (
     <div className="flex flex-col gap-3 font-mono h-full">
       <div className="text-amber-400 text-xs tracking-widest">▶ AI SCOUT — PENASIHAT KEUANGAN</div>
 
-      {/* Quick Questions */}
-      <div className="flex flex-wrap gap-1">
-        {FAQ.map(f => (
-          <button
-            key={f.q}
-            onClick={() => { setInput(f.q); }}
-            className="text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded hover:border-cyan-400 hover:text-cyan-400 transition-colors"
-          >
-            {f.q}
-          </button>
-        ))}
+      {/* PDF Upload area */}
+      <div className={`border rounded-lg p-2 text-xs transition-all
+        ${pdfContext ? 'border-green-500/50 bg-green-900/10' : 'border-zinc-700 bg-zinc-900/50'}`}>
+        {pdfContext ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-green-400">
+              <span>📄</span>
+              <span className="truncate max-w-[200px]">{pdfName}</span>
+              <span className="text-green-600">— aktif</span>
+            </div>
+            <button onClick={clearPdf}
+              className="text-zinc-500 hover:text-red-400 transition-colors text-xs px-1">
+              ✕ hapus
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="text-zinc-500">Upload prospektus PDF untuk analisis mendalam</span>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadLoading}
+              className="border border-amber-400/50 text-amber-400 px-2 py-1 rounded hover:bg-amber-400/20 transition-colors disabled:opacity-50">
+              {uploadLoading ? '⏳ Membaca...' : '📤 Upload PDF'}
+            </button>
+          </div>
+        )}
+        <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
       </div>
+
+      {/* Quick questions */}
+      {!pdfContext && (
+        <div className="flex flex-wrap gap-1">
+          {FAQ.map(f => (
+            <button key={f.q} onClick={() => handleSend(f.q)}
+              className="text-xs border border-zinc-700 text-zinc-400 px-2 py-0.5 rounded hover:border-cyan-400 hover:text-cyan-400 transition-colors">
+              {f.q}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Chat */}
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto border border-zinc-800 rounded p-2 bg-zinc-900/50">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded px-3 py-2 text-xs leading-relaxed
+            <div className={`max-w-[85%] rounded px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap
               ${m.role === 'user'
                 ? 'bg-amber-400/20 border border-amber-400/50 text-amber-200'
                 : 'bg-zinc-800 border border-zinc-700 text-zinc-300'
@@ -80,6 +164,14 @@ export default function AIScout() {
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-800 border border-zinc-700 text-zinc-500 rounded px-3 py-2 text-xs">
+              AI: <span className="animate-pulse">●●●</span>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
       </div>
 
       {/* Input */}
@@ -87,14 +179,15 @@ export default function AIScout() {
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder="Tanya soal investasi..."
-          className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white outline-none focus:border-amber-400 transition-colors"
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          placeholder={pdfContext ? `Tanya tentang ${pdfName}...` : 'Tanya soal investasi...'}
+          disabled={loading}
+          className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs text-white outline-none focus:border-amber-400 transition-colors disabled:opacity-50"
         />
         <button
-          onClick={handleSend}
-          className="border border-amber-400 text-amber-400 px-3 py-2 rounded text-xs hover:bg-amber-400/20 transition-colors"
-        >
+          onClick={() => handleSend()}
+          disabled={loading || !input.trim()}
+          className="border border-amber-400 text-amber-400 px-3 py-2 rounded text-xs hover:bg-amber-400/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           KIRIM
         </button>
       </div>
