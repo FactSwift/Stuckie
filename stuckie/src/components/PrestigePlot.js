@@ -124,7 +124,7 @@ export default function PrestigePlot({ containerW, timeMode }) {
                   <div className="text-amber-400 font-bold">{prestige.houseName}</div>
                   <div className="text-zinc-500 text-xs">{prestige.title}</div>
               </div>
-                  <div className="text-zinc-400 text-xs mb-2 leading-relaxed">{prestige.houseDesc}</div>
+                  
                   <button
                     onClick={() => setShowCollection(true)}
                     className="w-full py-1.5 border border-amber-400/50 text-amber-400 text-xs rounded hover:bg-amber-400/20 active:scale-95 transition-all font-bold"

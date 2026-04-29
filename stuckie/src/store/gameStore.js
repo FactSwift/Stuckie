@@ -59,43 +59,6 @@ export const REAL_ASSETS = [
     landCost: 3, color: 'amber',
   },
 
-  // === KENDARAAN (tidak butuh tanah) ===
-  {
-    id: 'motor', category: 'Kendaraan', name: 'Motor Ojol', icon: '🛵',
-    desc: 'Armada ojek online. Passive income dari driver.',
-    baseCost: 25000000, incomePerSec: 120, maxLevel: 5,
-    levelMultiplier: 1.4, upgradeCostMultiplier: 2.0,
-    landCost: 0, color: 'cyan',
-  },
-  {
-    id: 'mobil', category: 'Kendaraan', name: 'Mobil Rental', icon: '🚗',
-    desc: 'Armada rental mobil. Disewakan harian.',
-    baseCost: 200000000, incomePerSec: 900, maxLevel: 5,
-    levelMultiplier: 1.4, upgradeCostMultiplier: 2.0,
-    landCost: 0, color: 'cyan',
-  },
-  {
-    id: 'bus', category: 'Kendaraan', name: 'Bus Pariwisata', icon: '🚌',
-    desc: 'Armada bus wisata. Booking penuh tiap weekend.',
-    baseCost: 800000000, incomePerSec: 4000, maxLevel: 5,
-    levelMultiplier: 1.4, upgradeCostMultiplier: 2.0,
-    landCost: 0, color: 'cyan',
-  },
-  {
-    id: 'kapal', category: 'Kendaraan', name: 'Kapal Kargo', icon: '🚢',
-    desc: 'Kapal pengiriman barang antar pulau.',
-    baseCost: 8000000000, incomePerSec: 40000, maxLevel: 5,
-    levelMultiplier: 1.4, upgradeCostMultiplier: 2.0,
-    landCost: 0, color: 'cyan',
-  },
-  {
-    id: 'pesawat', category: 'Kendaraan', name: 'Pesawat Charter', icon: '✈️',
-    desc: 'Armada pesawat charter VIP.',
-    baseCost: 80000000000, incomePerSec: 500000, maxLevel: 5,
-    levelMultiplier: 1.4, upgradeCostMultiplier: 2.0,
-    landCost: 0, color: 'cyan',
-  },
-
   // === BISNIS ===
   {
     id: 'warung', category: 'Bisnis', name: 'Warung Makan', icon: '🍜',

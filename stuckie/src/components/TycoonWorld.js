@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { useGameStore, REAL_ASSETS } from '@/store/gameStore';
 
-const CATEGORIES = ['Semua', 'Properti', 'Kendaraan', 'Bisnis', 'Gaya Hidup'];
+const CATEGORIES = ['Semua', 'Tanah', 'Properti', 'Bisnis', 'Gaya Hidup'];
 
 const COLOR_MAP = {
   amber:  { border: 'border-amber-500/60',  bg: 'bg-amber-500/10',  text: 'text-amber-400',  btn: 'border-amber-400 text-amber-400 hover:bg-amber-400/20' },

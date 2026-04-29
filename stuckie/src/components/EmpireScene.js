@@ -444,7 +444,7 @@ export default function EmpireScene() {
 
   const nonLandEntries = Object.entries(realAssets).filter(([id]) => {
     const def = REAL_ASSETS.find(a => a.id === id);
-    return def && def.landCost === 0 && !def.isLuxury; // exclude luxury items
+    return def && def.landCost === 0 && !def.isLuxury && def.category !== 'Kendaraan';
   });
 
   const fmt = n => n >= 1e6 ? `${(n/1e6).toFixed(1)}jt` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : Math.floor(n);
