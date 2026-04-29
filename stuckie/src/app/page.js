@@ -13,13 +13,13 @@ import FloatingTexts from '@/components/FloatingTexts';
 import StartScreen from '@/components/StartScreen';
 
 const TABS = [
-  { id: 'hq',       label: '🏠',  name: 'HQ'       },
-  { id: 'world',    label: '🌏',  name: 'WORLD'    },
-  { id: 'terminal', label: '📊',  name: 'MARKET'   },
-  { id: 'upgrade',  label: '⚡',  name: 'UPGRADE'  },
-  { id: 'news',     label: '📡',  name: 'INTEL'    },
-  { id: 'whatif',   label: '🔮',  name: 'WHAT-IF'  },
-  { id: 'scout',    label: '🤖',  name: 'AI SCOUT' },
+  { id: 'hq',       label: '🌍',  name: 'DUNIA'       },
+  { id: 'world',    label: '🛒',  name: 'BELI ASET'   },
+  { id: 'terminal', label: '📊',  name: 'PASAR'       },
+  { id: 'upgrade',  label: '⚡',  name: 'UPGRADE'     },
+  { id: 'news',     label: '📡',  name: 'BERITA'      },
+  { id: 'whatif',   label: '🔮',  name: 'SIMULASI'    },
+  { id: 'scout',    label: '🤖',  name: 'AI SCOUT'    },
 ];
 
 export default function Home() {
@@ -113,7 +113,7 @@ export default function Home() {
           <span className="text-zinc-500 hidden sm:block">{time}</span>
           <button onClick={() => setShowSave(true)}
             className="text-xs border border-zinc-700 text-zinc-500 px-2 py-0.5 rounded hover:border-amber-400 hover:text-amber-400 transition-colors">
-            💾 SAVE
+            💾 SIMPAN
           </button>
           <button
             onClick={() => {

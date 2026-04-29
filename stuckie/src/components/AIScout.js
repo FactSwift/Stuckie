@@ -51,7 +51,7 @@ export default function AIScout() {
 
   return (
     <div className="flex flex-col gap-3 font-mono h-full">
-      <div className="text-amber-400 text-xs tracking-widest">▶ AI SCOUT — FINANCIAL ADVISOR</div>
+      <div className="text-amber-400 text-xs tracking-widest">▶ AI SCOUT — PENASIHAT KEUANGAN</div>
 
       {/* Quick Questions */}
       <div className="flex flex-wrap gap-1">
@@ -95,7 +95,7 @@ export default function AIScout() {
           onClick={handleSend}
           className="border border-amber-400 text-amber-400 px-3 py-2 rounded text-xs hover:bg-amber-400/20 transition-colors"
         >
-          SEND
+          KIRIM
         </button>
       </div>
     </div>

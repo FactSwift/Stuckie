@@ -136,31 +136,39 @@ export const REAL_ASSETS = [
   // === GAYA HIDUP ===
   {
     id: 'jam', category: 'Gaya Hidup', name: 'Jam Tangan Mewah', icon: '⌚',
-    desc: 'Rolex GMT Master II. Status symbol.',
+    desc: 'Rolex GMT Master II. Simbol status.',
     baseCost: 150000000, incomePerSec: 0, maxLevel: 1,
     levelMultiplier: 1, upgradeCostMultiplier: 1,
-    landCost: 0, xpBonus: 500, color: 'purple',
+    landCost: 0, xpBonus: 500, color: 'purple', isLuxury: true,
+    displayName: 'Jam Rolex GMT Master II',
+    displayDesc: 'Jam tangan mewah Swiss. Dibuat dengan presisi tinggi.',
   },
   {
     id: 'supercar', category: 'Gaya Hidup', name: 'Supercar', icon: '🏎️',
     desc: 'Lamborghini Huracan. Bukan investasi, tapi worth it.',
     baseCost: 5000000000, incomePerSec: 0, maxLevel: 1,
     levelMultiplier: 1, upgradeCostMultiplier: 1,
-    landCost: 0, xpBonus: 2000, color: 'purple',
+    landCost: 0, xpBonus: 2000, color: 'purple', isLuxury: true,
+    displayName: 'Lamborghini Huracan',
+    displayDesc: 'Supercar Italia 640 HP. 0-100 km/h dalam 2.9 detik.',
   },
   {
     id: 'yacht', category: 'Gaya Hidup', name: 'Yacht Pribadi', icon: '⛵',
     desc: 'Yacht 40 meter. Weekend di Labuan Bajo.',
     baseCost: 50000000000, incomePerSec: 0, maxLevel: 1,
     levelMultiplier: 1, upgradeCostMultiplier: 1,
-    landCost: 0, xpBonus: 10000, color: 'purple',
+    landCost: 0, xpBonus: 10000, color: 'purple', isLuxury: true,
+    displayName: 'Yacht Mewah 40 Meter',
+    displayDesc: 'Berlayar ke Labuan Bajo, Raja Ampat, dan Komodo.',
   },
   {
     id: 'pulau', category: 'Gaya Hidup', name: 'Pulau Pribadi', icon: '🏝️',
     desc: 'Pulau kecil di Raja Ampat. Puncak kemewahan.',
     baseCost: 500000000000, incomePerSec: 0, maxLevel: 1,
     levelMultiplier: 1, upgradeCostMultiplier: 1,
-    landCost: 0, xpBonus: 50000, color: 'purple',
+    landCost: 0, xpBonus: 50000, color: 'purple', isLuxury: true,
+    displayName: 'Pulau Pribadi Raja Ampat',
+    displayDesc: 'Pulau eksklusif dengan pantai pasir putih dan terumbu karang.',
   },
 ];
 
@@ -184,13 +192,13 @@ const NEWS_POOL = [
 ];
 
 export const PRESTIGE_TITLES = [
-  { min: 0,             title: 'Anak Kos Bokek',     icon: '🥉' },
-  { min: 15000000,      title: 'Karyawan Rajin',      icon: '🥈' },
-  { min: 100000000,     title: 'Investor Pemula',     icon: '🥇' },
-  { min: 1000000000,    title: 'Pengusaha Muda',      icon: '🏅' },
-  { min: 10000000000,   title: 'Konglomerat Lokal',   icon: '💎' },
-  { min: 100000000000,  title: 'Taipan Nusantara',    icon: '👑' },
-  { min: 1000000000000, title: 'FINANCIAL EMPEROR',   icon: '🌏' },
+  { min: 0,             title: 'Anak Kos Bokek',     icon: '/sprites/tingkat 1.png', houseName: 'Kamar Kos',        houseIcon: '🏚️', houseDesc: 'Kamar kos sempit 3x3 meter.' },
+  { min: 15000000,      title: 'Karyawan Rajin',      icon: '/sprites/tingkat 2.png', houseName: 'Rumah Kontrakan',  houseIcon: '🏠', houseDesc: 'Rumah kontrakan 2 kamar di pinggiran kota.' },
+  { min: 100000000,     title: 'Investor Pemula',     icon: '/sprites/tingkat 3.png', houseName: 'Rumah Subsidi',    houseIcon: '🏡', houseDesc: 'Rumah KPR subsidi dengan taman kecil.' },
+  { min: 1000000000,    title: 'Pengusaha Muda',      icon: '/sprites/tingkat 4.png', houseName: 'Rumah Cluster',    houseIcon: '🏘️', houseDesc: 'Rumah cluster modern di perumahan elite.' },
+  { min: 10000000000,   title: 'Konglomerat Lokal',   icon: '/sprites/tingkat 5.png', houseName: 'Villa Mewah',      houseIcon: '🏰', houseDesc: 'Villa 5 kamar dengan kolam renang pribadi.' },
+  { min: 100000000000,  title: 'Taipan Nusantara',    icon: '/sprites/tingkat 6.png', houseName: 'Mansion',          houseIcon: '🏯', houseDesc: 'Mansion 3 lantai dengan helipad dan garasi 10 mobil.' },
+  { min: 1000000000000, title: 'FINANCIAL EMPEROR',   icon: '/sprites/tingkat 7.png', houseName: 'Istana Pribadi',   houseIcon: '👑', houseDesc: 'Istana megah seluas 5 hektar. Puncak kemewahan.' },
 ];
 
 export const SAVE_KEY_PREFIX = 'stuckie_save_';
@@ -201,6 +209,7 @@ export const INITIAL_STATE = {
   portfolio: [],
   plots: [],
   realAssets: {},
+  luxuryItems: [], // ['jam', 'supercar', ...] — owned luxury items
   news: [],
   activeNews: null,
   gameTime: 0,
@@ -282,6 +291,7 @@ export const useGameStore = create((set, get) => ({
     const income = get().getPassiveIncome();
     set(s => ({
       pendingIncome: s.pendingIncome + income,
+      // gameTime increments every tick but EmpireScene only reads it every 60s
       gameTime: s.gameTime + 1,
     }));
   },
@@ -300,9 +310,14 @@ export const useGameStore = create((set, get) => ({
   },
 
   checkLevelUp: () => {
-    const { xp, level } = get();
-    const needed = level * 1000;
-    if (xp >= needed) set(s => ({ level: s.level + 1, xp: s.xp - needed }));
+    let { xp, level } = get();
+    let changed = false;
+    while (xp >= level * 1000) {
+      xp -= level * 1000;
+      level += 1;
+      changed = true;
+    }
+    if (changed) set({ xp, level });
   },
 
   addFloatingText: (text, x, y) => {
@@ -386,6 +401,20 @@ export const useGameStore = create((set, get) => ({
 
     // Non-land assets (kendaraan, gaya hidup) — use realAssets
     if (def.landCost === 0) {
+      // Luxury items go to luxuryItems array
+      if (def.isLuxury) {
+        const { luxuryItems } = get();
+        if (luxuryItems.includes(assetId)) return { success: false, msg: 'Sudah dimiliki!' };
+        const cost = def.baseCost;
+        if (balance < cost) return { success: false, msg: 'Saldo tidak cukup!' };
+        set(s => ({
+          balance: s.balance - cost,
+          luxuryItems: [...s.luxuryItems, assetId],
+          xp: s.xp + (def.xpBonus || 100),
+        }));
+        get().checkLevelUp();
+        return { success: true, msg: `🎉 ${def.name} ditambahkan ke koleksi!` };
+      }
       const cost = def.baseCost * purchaseQty;
       if (balance < cost) return { success: false, msg: 'Saldo tidak cukup!' };
       const existing = realAssets[assetId];
@@ -513,9 +542,9 @@ export const useGameStore = create((set, get) => ({
   },
 
   saveToSlot: (slot) => {
-    const { balance, portfolio, plots, realAssets, marketUpgrades, gameTime, totalTrades, xp, level, pendingIncome, priceHistory } = get();
+    const { balance, portfolio, plots, realAssets, luxuryItems, marketUpgrades, gameTime, totalTrades, xp, level, pendingIncome, priceHistory } = get();
     const save = {
-      balance, portfolio, plots, realAssets,
+      balance, portfolio, plots, realAssets, luxuryItems,
       marketUpgrades, gameTime, totalTrades, xp, level, pendingIncome, priceHistory,
       savedAt: Date.now(),
     };
@@ -563,6 +592,7 @@ export const useGameStore = create((set, get) => ({
         portfolio: save.portfolio ?? [],
         plots: save.plots ?? [],
         realAssets: save.realAssets ?? {},
+        luxuryItems: save.luxuryItems ?? [],
         marketUpgrades: save.marketUpgrades ?? MARKET_UPGRADES,
         gameTime: save.gameTime ?? 0,
         totalTrades: save.totalTrades ?? 0,

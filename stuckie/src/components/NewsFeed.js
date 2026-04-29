@@ -13,7 +13,7 @@ export default function NewsFeed() {
   return (
     <div className="flex flex-col gap-3 font-mono h-full">
       <div className="flex items-center justify-between">
-        <div className="text-amber-400 text-xs tracking-widest">▶ MARKET INTEL FEED</div>
+        <div className="text-amber-400 text-xs tracking-widest">▶ UMPAN BERITA PASAR</div>
         <span className="text-zinc-500 text-xs border border-zinc-700 px-2 py-0.5 rounded">T+{gameTime}s</span>
       </div>
 

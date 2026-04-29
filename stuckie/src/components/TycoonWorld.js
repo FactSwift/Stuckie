@@ -21,7 +21,7 @@ function formatRp(n) {
 }
 
 export default function TycoonWorld() {
-  const { balance, realAssets, plots, buyRealAsset, upgradeRealAsset, addFloatingText, getLandStats } = useGameStore();
+  const { balance, realAssets, plots, buyRealAsset, upgradeRealAsset, addFloatingText, getLandStats, luxuryItems } = useGameStore();
   const [cat, setCat] = useState('Semua');
   const [buyQty, setBuyQty] = useState(1);
   const [toast, setToast] = useState(null);
@@ -124,13 +124,16 @@ export default function TycoonWorld() {
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 pr-1" ref={containerRef}>
         {filtered.map(def => {
           // Get owned data from correct source
-          const ownedRaw = def.landCost > 0 || def.id === 'tanah'
+          const isLuxury = def.isLuxury;
+          const luxuryOwned = isLuxury && luxuryItems.includes(def.id);
+          const ownedRaw = isLuxury ? null
+            : def.landCost > 0 || def.id === 'tanah'
             ? (def.id === 'tanah' ? { qty: plots.length, level: 1 } : getPlotOwned(def.id))
             : realAssets[def.id];
-          const qty = ownedRaw?.qty ?? 0;
+          const qty = luxuryOwned ? 1 : (ownedRaw?.qty ?? 0);
           const level = ownedRaw?.level ?? 1;
-          const isOwned = qty > 0;
-          const isMaxed = isOwned && level >= def.maxLevel;
+          const isOwned = luxuryOwned || qty > 0;
+          const isMaxed = isLuxury ? luxuryOwned : (isOwned && level >= def.maxLevel);
           const buyCost = def.baseCost * buyQty;
           const upgradeCost = isOwned
             ? Math.floor(def.baseCost * Math.pow(def.upgradeCostMultiplier, level) * qty)

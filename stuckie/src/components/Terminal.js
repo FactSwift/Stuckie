@@ -49,16 +49,16 @@ export default function Terminal() {
     <div className="flex flex-col gap-3 h-full">
       <div className="flex items-center justify-between">
         <div className="text-amber-400 font-mono text-xs tracking-widest">
-          ▶ MARKET TERMINAL
+          ▶ TERMINAL PASAR
         </div>
         <div className="text-xs text-zinc-500">
-          Cash: <span className="text-green-400">Rp{balance.toLocaleString('id')}</span>
+          Kas: <span className="text-green-400">Rp{balance.toLocaleString('id')}</span>
         </div>
       </div>
 
       {passiveIncome > 0 && (
         <div className="text-xs text-center text-green-400/70 border border-green-400/20 rounded py-1 bg-green-400/5">
-          ⚡ Portfolio menghasilkan <span className="text-green-400 font-bold">+Rp{Math.floor(passiveIncome).toLocaleString('id')}/detik</span> — klik COLLECT di HQ!
+          ⚡ Portfolio menghasilkan <span className="text-green-400 font-bold">+Rp{Math.floor(passiveIncome).toLocaleString('id')}/detik</span> — klik KUMPULKAN di tab Dunia!
         </div>
       )}
 
@@ -129,7 +129,7 @@ export default function Terminal() {
               const maxLot = Math.floor(balance / selected.price);
               setQty(Math.max(1, maxLot));
             }} className="text-xs border border-zinc-600 text-zinc-400 px-2 py-1 rounded hover:border-amber-400 hover:text-amber-400 transition-colors">
-              MAX
+              MAKS
             </button>
             <span className="text-zinc-400 text-xs ml-auto">
               = <span className="text-white font-bold">Rp{(selected.price * qty).toLocaleString('id')}</span>

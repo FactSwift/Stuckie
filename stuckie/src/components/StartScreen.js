@@ -131,7 +131,7 @@ export default function StartScreen({ onStart }) {
             style={{ fontSize: 44, textShadow: '0 0 30px #f59e0b, 0 0 60px #f59e0b44' }}>
             STUCKIE
           </div>
-          <div className="text-zinc-500 text-xs tracking-widest">FINANCIAL TYCOON SIMULATOR</div>
+          <div className="text-zinc-500 text-xs tracking-widest">SIMULATOR KEUANGAN TYCOON</div>
         </div>
 
         {/* Save Slots */}
@@ -205,11 +205,11 @@ export default function StartScreen({ onStart }) {
                     <div className="flex flex-col gap-2">
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         <div>
-                          <div className="text-zinc-600">BALANCE</div>
+                          <div className="text-zinc-600">SALDO</div>
                           <div className="text-amber-400 font-bold">{formatRp(meta.balance)}</div>
                         </div>
                         <div>
-                          <div className="text-zinc-600">LEVEL</div>
+                          <div className="text-zinc-600">TINGKAT</div>
                           <div className="text-cyan-400 font-bold">LVL {meta.level}</div>
                         </div>
                         <div>
@@ -234,7 +234,7 @@ export default function StartScreen({ onStart }) {
                     <div className="flex gap-2">
                       <button onClick={() => handleNew(i)}
                         className="flex-1 py-3 border border-dashed border-zinc-700 text-zinc-500 text-xs rounded hover:border-amber-400/50 hover:text-amber-400/70 active:scale-95 transition-all">
-                        + GAME BARU
+                        + MULAI BARU
                       </button>
                       <button onClick={() => handleImportClick(i)}
                         className="px-3 py-3 border border-dashed border-zinc-700 text-zinc-500 text-xs rounded hover:border-cyan-400/50 hover:text-cyan-400/70 active:scale-95 transition-all"
@@ -252,7 +252,7 @@ export default function StartScreen({ onStart }) {
         {/* Footer */}
         <div className="text-zinc-700 text-xs text-center">
           <span className={blink ? 'opacity-100' : 'opacity-0'}>█</span>
-          {' '}STUCKIE v0.1.0 · DICODING HACKATHON 2025{' '}
+          {' '}STUCKIE v0.1.0 · HACKATHON DICODING 2025{' '}
           <span className={blink ? 'opacity-100' : 'opacity-0'}>█</span>
         </div>
       </div>

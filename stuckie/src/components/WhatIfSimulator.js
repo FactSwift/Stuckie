@@ -31,7 +31,7 @@ export default function WhatIfSimulator() {
 
   return (
     <div className="flex flex-col gap-3 font-mono h-full">
-      <div className="text-amber-400 text-xs tracking-widest">▶ SIMULATOR WHAT-IF</div>
+      <div className="text-amber-400 text-xs tracking-widest">▶ SIMULATOR BAGAIMANA JIKA</div>
 
       {/* Presets */}
       <div className="flex gap-2 flex-wrap">
@@ -49,7 +49,7 @@ export default function WhatIfSimulator() {
       {/* Inputs */}
       <div className="grid grid-cols-3 gap-2">
         <div className="border border-zinc-700 rounded p-2 bg-zinc-900">
-          <div className="text-zinc-500 text-xs mb-1">INVEST/BULAN</div>
+          <div className="text-zinc-500 text-xs mb-1">INVESTASI/BULAN</div>
           <input
             type="number"
             value={monthly}
@@ -68,7 +68,7 @@ export default function WhatIfSimulator() {
           />
         </div>
         <div className="border border-zinc-700 rounded p-2 bg-zinc-900">
-          <div className="text-zinc-500 text-xs mb-1">RETURN %/TH</div>
+          <div className="text-zinc-500 text-xs mb-1">IMBAL HASIL %/TH</div>
           <input
             type="number"
             value={rate}
@@ -87,7 +87,7 @@ export default function WhatIfSimulator() {
         </div>
         <div className="flex gap-4 mt-1 text-xs">
           <span className="text-zinc-400">Modal: Rp{totalInvested.toLocaleString('id')}</span>
-          <span className="text-green-400">Gain: +Rp{Math.round(gain).toLocaleString('id')}</span>
+          <span className="text-green-400">Keuntungan: +Rp{Math.round(gain).toLocaleString('id')}</span>
         </div>
       </div>
 

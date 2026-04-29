@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useGameStore, REAL_ASSETS } from '@/store/gameStore';
 import { PixelArt, BUILDING_SPRITES, ENV_SPRITES, ASSET_ENV, ASSET_GROUND } from '../sprites/PixelSprites';
+import PrestigePlot from './PrestigePlot';
 
 const SCALE = 3;
 const TILE_COLS = 6;
@@ -37,9 +38,15 @@ const TIME_MODES = [
   },
 ];
 
-// Auto-cycle every 3 minutes (180s game time)
-function useTimeOfDay(gameTime) {
-  const idx = Math.floor(gameTime / 180) % TIME_MODES.length;
+// Auto-cycle every 3 minutes — uses local state, not gameTime
+function useTimeOfDay() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setIdx(i => (i + 1) % TIME_MODES.length);
+    }, 3 * 60 * 1000); // 3 minutes
+    return () => clearInterval(iv);
+  }, []);
   return TIME_MODES[idx];
 }
 
@@ -420,11 +427,13 @@ function FloatingRow({ entries, containerW }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function EmpireScene() {
-  const { plots, realAssets, getPassiveIncome, gameTime } = useGameStore();
+  const plots = useGameStore(s => s.plots);
+  const realAssets = useGameStore(s => s.realAssets);
+  const getPassiveIncome = useGameStore(s => s.getPassiveIncome);
   const containerRef = useRef(null);
   const [containerW, setContainerW] = useState(600);
   const totalIncome = getPassiveIncome();
-  const timeMode = useTimeOfDay(gameTime);
+  const timeMode = useTimeOfDay();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -435,7 +444,7 @@ export default function EmpireScene() {
 
   const nonLandEntries = Object.entries(realAssets).filter(([id]) => {
     const def = REAL_ASSETS.find(a => a.id === id);
-    return def && def.landCost === 0;
+    return def && def.landCost === 0 && !def.isLuxury; // exclude luxury items
   });
 
   const fmt = n => n >= 1e6 ? `${(n/1e6).toFixed(1)}jt` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : Math.floor(n);
@@ -445,7 +454,7 @@ export default function EmpireScene() {
       <div className="flex flex-col items-center justify-center border border-zinc-800 rounded-lg bg-zinc-950 font-mono py-8">
         <div className="text-4xl mb-2">🏚️</div>
         <div className="text-zinc-500 text-xs text-center px-4">
-          Empire masih kosong.<br />Beli kavling tanah di tab 🌏 WORLD!
+          Empire masih kosong.<br />Beli kavling tanah di tab 🛒 Beli Aset!
         </div>
       </div>
     );
@@ -462,6 +471,8 @@ export default function EmpireScene() {
       </div>
 
       <div ref={containerRef} className="rounded-lg border border-zinc-700 overflow-hidden">
+        {/* Kavling spesial — selalu di paling atas */}
+        <PrestigePlot containerW={containerW} timeMode={timeMode} />
         {plots.map((plot, i) => (
           <PlotRow key={plot.id} plot={plot} plotIndex={i} containerW={containerW} timeMode={timeMode} />
         ))}
