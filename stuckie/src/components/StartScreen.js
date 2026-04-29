@@ -131,7 +131,7 @@ export default function StartScreen({ onStart }) {
             style={{ fontSize: 44, textShadow: '0 0 30px #f59e0b, 0 0 60px #f59e0b44' }}>
             STUCKIE
           </div>
-          <div className="text-zinc-500 text-xs tracking-widest">SIMULATOR KEUANGAN TYCOON</div>
+          <div className="text-zinc-500 text-xs tracking-widest">GAME TYCOON SIMULATOR KEUANGAN</div>
         </div>
 
         {/* Save Slots */}
@@ -252,7 +252,7 @@ export default function StartScreen({ onStart }) {
         {/* Footer */}
         <div className="text-zinc-700 text-xs text-center">
           <span className={blink ? 'opacity-100' : 'opacity-0'}>█</span>
-          {' '}STUCKIE v0.1.0 · HACKATHON DICODING 2025{' '}
+          {' '}STUCKIE v0.1.0 · HACKATHON DICODING 2026 · TIM GIT GUD{' '}
           <span className={blink ? 'opacity-100' : 'opacity-0'}>█</span>
         </div>
       </div>

@@ -67,7 +67,7 @@ export default function TycoonWorld() {
   return (
     <div className="flex flex-col gap-3 h-full font-mono">
       <div className="flex items-center justify-between">
-        <div className="text-amber-400 text-xs tracking-widest">▶ TYCOON WORLD</div>
+        <div className="text-amber-400 text-xs tracking-widest">▶ BELI ASET</div>
         <div className="text-xs text-green-400">Cash: {formatRp(balance)}</div>
       </div>
 
