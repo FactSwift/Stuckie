@@ -163,26 +163,119 @@ export default function StartScreen({ onStart }) {
 
         <div className="w-full flex flex-col gap-3">
           {slots.map((meta, i) => (
-            <div key={i} className="border border-zinc-700 rounded-lg p-3 bg-zinc-950">
-              <div className="text-zinc-400 text-xs mb-2">SLOT {i + 1}</div>
+            <div key={i} className={`border rounded-lg p-3 bg-zinc-950 transition-all
+              ${meta ? 'border-zinc-700 hover:border-zinc-500' : 'border-zinc-800'}`}>
+
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-zinc-500 text-xs tracking-widest">SLOT {i + 1}</span>
+                {meta && (
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => handleImportClick(i)}
+                      className="text-xs border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded hover:border-cyan-400 hover:text-cyan-400 transition-colors"
+                      title="Import save">
+                      📥
+                    </button>
+                    <button onClick={() => handleExport(i)}
+                      className="text-xs border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded hover:border-cyan-400 hover:text-cyan-400 transition-colors"
+                      title="Export save">
+                      📤
+                    </button>
+                    <button onClick={() => setConfirmDelete(i)}
+                      className="text-xs border border-zinc-700 text-zinc-500 px-1.5 py-0.5 rounded hover:border-red-400 hover:text-red-400 transition-colors"
+                      title="Hapus save">
+                      🗑
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {meta ? (
                 <>
-                  <div className="text-amber-400">{formatRp(meta.balance)}</div>
-                  <div className="flex gap-2 mt-2">
-                    <button onClick={() => handleLoad(i)} className="flex-1 border border-amber-400 py-1">LANJUT</button>
-                    <button onClick={() => handleNew(i)} className="flex-1 border border-zinc-600 py-1">BARU</button>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <span className="text-amber-400 font-bold text-lg">{formatRp(meta.balance)}</span>
+                    <span className="text-zinc-600 text-xs">LVL {meta.level}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
+                    <span>⏱ {formatTime(meta.gameTime)}</span>
+                    <span>·</span>
+                    <span>{formatDate(meta.savedAt)}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleLoad(i)}
+                      className="flex-1 border border-amber-400 text-amber-400 py-1.5 text-xs font-bold rounded hover:bg-amber-400/20 active:scale-95 transition-all">
+                      ▶ LANJUT
+                    </button>
+                    <button onClick={() => handleNew(i)}
+                      className="flex-1 border border-zinc-600 text-zinc-400 py-1.5 text-xs font-bold rounded hover:border-zinc-400 hover:text-zinc-200 active:scale-95 transition-all">
+                      ↺ BARU
+                    </button>
                   </div>
                 </>
               ) : (
-                <button onClick={() => handleNew(i)} className="w-full border border-dashed border-zinc-700 py-2 text-xs">
-                  + GAME BARU
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => handleNew(i)}
+                    className="flex-1 border border-dashed border-zinc-700 text-zinc-500 py-2.5 text-xs rounded hover:border-amber-400 hover:text-amber-400 active:scale-95 transition-all">
+                    + GAME BARU
+                  </button>
+                  <button onClick={() => handleImportClick(i)}
+                    className="border border-dashed border-zinc-700 text-zinc-500 px-3 py-2.5 text-xs rounded hover:border-cyan-400 hover:text-cyan-400 active:scale-95 transition-all"
+                    title="Import save ke slot ini">
+                    📥 IMPORT
+                  </button>
+                </div>
               )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Confirm Delete Modal */}
+      {confirmDelete !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 font-mono px-4">
+          <div className="w-full max-w-xs border border-red-500/50 rounded-lg bg-zinc-950 p-4">
+            <div className="text-red-400 text-xs tracking-widest mb-2">⚠ HAPUS SAVE</div>
+            <div className="text-zinc-400 text-xs mb-4">Yakin hapus Slot {confirmDelete + 1}? Data tidak bisa dikembalikan.</div>
+            <div className="flex gap-2">
+              <button onClick={() => handleDelete(confirmDelete)}
+                className="flex-1 border border-red-500 text-red-400 py-1.5 text-xs rounded hover:bg-red-500/20 transition-colors">
+                🗑 HAPUS
+              </button>
+              <button onClick={() => setConfirmDelete(null)}
+                className="flex-1 border border-zinc-700 text-zinc-400 py-1.5 text-xs rounded hover:bg-zinc-800 transition-colors">
+                BATAL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm New Game Modal */}
+      {confirmNew !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 font-mono px-4">
+          <div className="w-full max-w-xs border border-amber-500/50 rounded-lg bg-zinc-950 p-4">
+            <div className="text-amber-400 text-xs tracking-widest mb-2">⚠ GAME BARU</div>
+            <div className="text-zinc-400 text-xs mb-4">Slot {confirmNew + 1} sudah ada save. Data lama akan tertimpa!</div>
+            <div className="flex gap-2">
+              <button onClick={handleConfirmNew}
+                className="flex-1 border border-amber-400 text-amber-400 py-1.5 text-xs rounded hover:bg-amber-400/20 transition-colors">
+                ✓ LANJUT
+              </button>
+              <button onClick={() => setConfirmNew(null)}
+                className="flex-1 border border-zinc-700 text-zinc-400 py-1.5 text-xs rounded hover:bg-zinc-800 transition-colors">
+                BATAL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded border font-mono text-sm whitespace-nowrap
+          ${toast.ok ? 'bg-green-900 border-green-500 text-green-300' : 'bg-red-900 border-red-500 text-red-300'}`}>
+          {toast.msg}
+        </div>
+      )}
     </div>
   );
 }

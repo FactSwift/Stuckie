@@ -43,7 +43,7 @@ export default function PortfolioPanel() {
   };
 
   return (
-    <div className="fixed bottom-24 right-4 z-50 w-80">
+    <div className="fixed bottom-24 left-4 z-50 w-80">
       {/* Collapsed Button */}
       {collapsed && (
         <button

@@ -31,12 +31,12 @@ export default function SwipeCard({ asset, onSwipeLeft, onSwipeRight }) {
       style={{
         rotate: dragX * 0.1,
       }}
-      className="relative w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing"
+      className="relative w-full max-w-xs mx-auto cursor-grab active:cursor-grabbing"
     >
-      <div className="bg-black border-2 border-amber-400/60 rounded-lg p-8 shadow-lg shadow-amber-400/20 min-h-[500px] flex flex-col justify-between font-mono">
+      <div className="bg-black border-2 border-amber-400/60 rounded-lg p-4 shadow-lg shadow-amber-400/20 flex flex-col justify-between font-mono">
         {/* Header Badge */}
-        <div className="flex items-center justify-between mb-6">
-          <span className="text-xs border border-amber-400 text-amber-400 px-3 py-1 rounded-full font-bold tracking-widest">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs border border-amber-400 text-amber-400 px-2 py-0.5 rounded-full font-bold tracking-widest">
             {asset.type}
           </span>
           <span className={`text-xs font-bold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
@@ -45,16 +45,16 @@ export default function SwipeCard({ asset, onSwipeLeft, onSwipeRight }) {
         </div>
 
         {/* Asset Name & Price */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-amber-400 mb-2">{asset.id}</h2>
-          <p className="text-sm text-zinc-400 mb-4">{asset.name}</p>
-          <div className="text-4xl font-bold text-green-400">
+        <div className="mb-2">
+          <h2 className="text-base font-bold text-amber-400 mb-0.5">{asset.id}</h2>
+          <p className="text-xs text-zinc-400 mb-1">{asset.name}</p>
+          <div className="text-xl font-bold text-green-400">
             Rp{asset.price.toLocaleString('id')}
           </div>
         </div>
 
         {/* Asset Details Grid */}
-        <div className="space-y-4 mb-8 bg-amber-400/5 border border-amber-400/20 rounded p-4">
+        <div className="space-y-1.5 mb-2 bg-amber-400/5 border border-amber-400/20 rounded p-2">
           <div>
             <p className="text-xs text-zinc-500 mb-1">DESCRIPTION</p>
             <p className="text-sm text-amber-100">{asset.description}</p>
@@ -100,7 +100,7 @@ export default function SwipeCard({ asset, onSwipeLeft, onSwipeRight }) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-amber-400/20 my-4" />
+        <div className="border-t border-amber-400/20 my-1.5" />
 
         {/* Action Hints */}
         <div className="flex items-center justify-between text-xs text-zinc-600 font-bold tracking-widest">
