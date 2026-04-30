@@ -43,17 +43,11 @@ export default function PrestigePlot({ containerW, timeMode }) {
   const [showCollection, setShowCollection] = useState(false);
   const plotW = containerW;
 
-  const netWorth = useGameStore(s => {
-    const { balance, marketAssets, portfolio } = s;
-    const portfolioVal = portfolio.reduce((sum, p) => {
-      const a = marketAssets.find(x => x.id === p.assetId);
-      return sum + (a ? a.price * p.qty : 0);
-    }, 0);
-    return balance + portfolioVal;
-  });
+  const netWorth = useGameStore(s => s.balance);
+  const level = useGameStore(s => s.level);
   const luxuryItems = useGameStore(s => s.luxuryItems);
 
-  const prestige = PRESTIGE_TITLES.filter(p => p.min <= netWorth).at(-1) || PRESTIGE_TITLES[0];
+  const prestige = PRESTIGE_TITLES.filter(p => p.minLevel <= level).at(-1) || PRESTIGE_TITLES[0];
   const prestigeIdx = PRESTIGE_TITLES.indexOf(prestige);
 
   return (

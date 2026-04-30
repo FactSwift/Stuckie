@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import Terminal from '@/components/Terminal';
 import NewsFeed from '@/components/NewsFeed';
@@ -29,6 +29,7 @@ export default function Home() {
   const [showSave, setShowSave] = useState(false);
   const [saveToast, setSaveToast] = useState(null);
   const [showScout, setShowScout] = useState(false);
+  const scoutPopupRef = useRef(null);
 
   const handleSave = (slot) => {
     saveToSlot(slot);
@@ -75,6 +76,18 @@ export default function Home() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [started, saveToSlot, currentSlot]);
 
+  // Close scout popup on outside click
+  useEffect(() => {
+    if (!showScout) return;
+    const handleClickOutside = (e) => {
+      if (scoutPopupRef.current && !scoutPopupRef.current.contains(e.target)) {
+        setShowScout(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showScout]);
+
   const hasPending = pendingIncome >= 1;
   const passiveIncome = getPassiveIncome();
 
@@ -83,7 +96,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-amber-400 font-mono flex flex-col overflow-hidden">
+    <div className="h-screen bg-black text-amber-400 font-mono flex flex-col overflow-hidden">
       {/* Scanlines */}
       <div className="pointer-events-none fixed inset-0 z-40"
         style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px)' }} />
@@ -134,13 +147,13 @@ export default function Home() {
 
       {/* Content */}
       <main className="flex-1 overflow-hidden">
-        <div className="h-full p-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 126px)' }}>
+        <div className="h-full p-3 flex flex-col">
           {activeTab === 'hq'       && <HQView />}
           {activeTab === 'world'    && <TycoonWorld />}
-          {activeTab === 'terminal' && <Terminal />}
-          {activeTab === 'upgrade'  && <UpgradeShop />}
-          {activeTab === 'news'     && <NewsFeed />}
-          {activeTab === 'whatif'   && <WhatIfSimulator />}
+          {activeTab === 'terminal' && <div className="h-full overflow-y-auto"><Terminal /></div>}
+          {activeTab === 'upgrade'  && <div className="h-full overflow-y-auto"><UpgradeShop /></div>}
+          {activeTab === 'news'     && <div className="h-full overflow-y-auto"><NewsFeed /></div>}
+          {activeTab === 'whatif'   && <div className="h-full overflow-y-auto"><WhatIfSimulator /></div>}
         </div>
       </main>
 
@@ -221,7 +234,7 @@ export default function Home() {
 
       {/* AI Scout popup — kiri dari tombol, tidak terpotong */}
       {showScout && (
-        <div className="fixed z-[60] w-96 max-w-[calc(100vw-2rem)] h-[480px] border border-cyan-400/50 rounded-xl bg-zinc-950 shadow-2xl flex flex-col overflow-hidden"
+        <div ref={scoutPopupRef} className="fixed z-[60] w-96 max-w-[calc(100vw-2rem)] h-[480px] border border-cyan-400/50 rounded-xl bg-zinc-950 shadow-2xl flex flex-col overflow-hidden"
           style={{
             bottom: 64,
             right: 80,

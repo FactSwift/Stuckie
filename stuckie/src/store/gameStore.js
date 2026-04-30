@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
 export const MARKET_ASSETS = [
-  { id: 'BBCA', name: 'Bank BCA', type: 'Saham', price: 9500, change: 0, description: 'Blue chip perbankan terbesar.', baseIncome: 12 },
-  { id: 'TLKM', name: 'Telkom Indonesia', type: 'Saham', price: 3200, change: 0, description: 'BUMN telekomunikasi.', baseIncome: 8 },
-  { id: 'GOTO', name: 'GoTo Group', type: 'Saham', price: 71, change: 0, description: 'Startup unicorn. High risk.', baseIncome: 3 },
-  { id: 'SBN001', name: 'SBN ORI023', type: 'SBN', price: 1000000, change: 0, description: 'Obligasi negara. Dijamin pemerintah.', baseIncome: 50 },
-  { id: 'RDPU', name: 'RD Pasar Uang', type: 'Reksa Dana', price: 1500, change: 0, description: 'Risiko rendah. ~5% p.a.', baseIncome: 5 },
-  { id: 'RDSH', name: 'RD Saham', type: 'Reksa Dana', price: 2800, change: 0, description: 'Potensi return tinggi.', baseIncome: 9 },
+  { id: 'BBCA', name: 'Bank BCA', type: 'Saham', price: 9500, change: 0, description: 'Blue chip perbankan terbesar.', baseIncome: 600 },
+  { id: 'TLKM', name: 'Telkom Indonesia', type: 'Saham', price: 3200, change: 0, description: 'BUMN telekomunikasi.', baseIncome: 400 },
+  { id: 'GOTO', name: 'GoTo Group', type: 'Saham', price: 71, change: 0, description: 'Startup unicorn. High risk.', baseIncome: 150 },
+  { id: 'SBN001', name: 'SBN ORI023', type: 'SBN', price: 1000000, change: 0, description: 'Obligasi negara. Dijamin pemerintah.', baseIncome: 10000, incomeInterval: 6 },
+  { id: 'RDPU', name: 'RD Pasar Uang', type: 'Reksa Dana', price: 1500, change: 0, description: 'Risiko rendah. ~5% p.a.', baseIncome: 250 },
+  { id: 'RDSH', name: 'RD Saham', type: 'Reksa Dana', price: 2800, change: 0, description: 'Potensi return tinggi.', baseIncome: 450 },
 ];
 
 // Real-world purchasable assets (tycoon style)
@@ -26,74 +26,74 @@ export const REAL_ASSETS = [
   {
     id: 'kos', category: 'Properti', name: 'Kos-kosan', icon: '🏠',
     desc: 'Kos 6 kamar di pinggir kampus. Selalu penuh!',
-    baseCost: 150000000, incomePerSec: 800, maxLevel: 5,
+    baseCost: 150000000, incomePerSec: 8000000, maxLevel: 5,
     levelMultiplier: 1.5, upgradeCostMultiplier: 2.2,
-    landCost: 1, color: 'amber',
+    landCost: 1, color: 'amber', incomeInterval: 1,
   },
   {
     id: 'ruko', category: 'Properti', name: 'Ruko Strategis', icon: '🏪',
     desc: 'Ruko di pinggir jalan raya. Disewakan ke tenant.',
-    baseCost: 500000000, incomePerSec: 2500, maxLevel: 5,
+    baseCost: 500000000, incomePerSec: 25000000, maxLevel: 5,
     levelMultiplier: 1.5, upgradeCostMultiplier: 2.2,
-    landCost: 1, color: 'amber',
+    landCost: 1, color: 'amber', incomeInterval: 1,
   },
   {
     id: 'apartemen', category: 'Properti', name: 'Apartemen', icon: '🏢',
     desc: 'Apartemen studio di pusat kota. ROI tinggi.',
-    baseCost: 1200000000, incomePerSec: 7000, maxLevel: 5,
+    baseCost: 1200000000, incomePerSec: 70000000, maxLevel: 5,
     levelMultiplier: 1.5, upgradeCostMultiplier: 2.2,
-    landCost: 2, color: 'amber',
+    landCost: 2, color: 'amber', incomeInterval: 1,
   },
   {
     id: 'mall', category: 'Properti', name: 'Mall', icon: '🏬',
     desc: 'Pusat perbelanjaan dengan ratusan tenant.',
-    baseCost: 10000000000, incomePerSec: 55000, maxLevel: 5,
+    baseCost: 10000000000, incomePerSec: 550000000, maxLevel: 5,
     levelMultiplier: 1.5, upgradeCostMultiplier: 2.2,
-    landCost: 4, color: 'amber',
+    landCost: 4, color: 'amber', incomeInterval: 3,
   },
   {
     id: 'gedung', category: 'Properti', name: 'Gedung Perkantoran', icon: '🏙️',
     desc: 'Gedung 20 lantai di CBD Jakarta.',
-    baseCost: 50000000000, incomePerSec: 300000, maxLevel: 5,
+    baseCost: 50000000000, incomePerSec: 3000000000, maxLevel: 5,
     levelMultiplier: 1.5, upgradeCostMultiplier: 2.2,
-    landCost: 3, color: 'amber',
+    landCost: 3, color: 'amber', incomeInterval: 3,
   },
 
   // === BISNIS ===
   {
     id: 'warung', category: 'Bisnis', name: 'Warung Makan', icon: '🍜',
     desc: 'Warung nasi padang. Antrian panjang tiap hari.',
-    baseCost: 10000000, incomePerSec: 60, maxLevel: 5,
+    baseCost: 10000000, incomePerSec: 600000, maxLevel: 5,
     levelMultiplier: 1.6, upgradeCostMultiplier: 2.5,
-    landCost: 1, color: 'green',
+    landCost: 1, color: 'green', incomeInterval: 1,
   },
   {
     id: 'cafe', category: 'Bisnis', name: 'Cafe Kekinian', icon: '☕',
     desc: 'Cafe aesthetic yang viral di Instagram.',
-    baseCost: 80000000, incomePerSec: 400, maxLevel: 5,
+    baseCost: 80000000, incomePerSec: 4000000, maxLevel: 5,
     levelMultiplier: 1.6, upgradeCostMultiplier: 2.5,
-    landCost: 1, color: 'green',
+    landCost: 1, color: 'green', incomeInterval: 1,
   },
   {
     id: 'startup', category: 'Bisnis', name: 'Startup Tech', icon: '💻',
     desc: 'Startup SaaS B2B. MRR terus naik.',
-    baseCost: 500000000, incomePerSec: 3000, maxLevel: 5,
+    baseCost: 500000000, incomePerSec: 30000000, maxLevel: 5,
     levelMultiplier: 1.6, upgradeCostMultiplier: 2.5,
-    landCost: 2, color: 'green',
+    landCost: 2, color: 'green', incomeInterval: 3,
   },
   {
     id: 'pabrik', category: 'Bisnis', name: 'Pabrik Manufaktur', icon: '🏭',
     desc: 'Pabrik produksi barang konsumsi.',
-    baseCost: 5000000000, incomePerSec: 28000, maxLevel: 5,
+    baseCost: 5000000000, incomePerSec: 280000000, maxLevel: 5,
     levelMultiplier: 1.6, upgradeCostMultiplier: 2.5,
-    landCost: 3, color: 'green',
+    landCost: 3, color: 'green', incomeInterval: 6,
   },
   {
     id: 'bank', category: 'Bisnis', name: 'Bank Swasta', icon: '🏦',
     desc: 'Bank dengan ribuan nasabah. Uang bekerja untuk uang.',
-    baseCost: 100000000000, incomePerSec: 800000, maxLevel: 5,
+    baseCost: 100000000000, incomePerSec: 8000000000, maxLevel: 5,
     levelMultiplier: 1.6, upgradeCostMultiplier: 2.5,
-    landCost: 4, color: 'green',
+    landCost: 4, color: 'green', incomeInterval: 12,
   },
 
   // === GAYA HIDUP ===
@@ -155,20 +155,20 @@ const NEWS_POOL = [
 ];
 
 export const PRESTIGE_TITLES = [
-  { min: 0,             title: 'Anak Kos Bokek',     icon: '/sprites/tingkat 1.png', houseName: 'Kamar Kos',        houseIcon: '🏚️', houseDesc: 'Kamar kos sempit 3x3 meter.' },
-  { min: 15000000,      title: 'Karyawan Rajin',      icon: '/sprites/tingkat 2.png', houseName: 'Rumah Kontrakan',  houseIcon: '🏠', houseDesc: 'Rumah kontrakan 2 kamar di pinggiran kota.' },
-  { min: 100000000,     title: 'Investor Pemula',     icon: '/sprites/tingkat 3.png', houseName: 'Rumah Subsidi',    houseIcon: '🏡', houseDesc: 'Rumah KPR subsidi dengan taman kecil.' },
-  { min: 1000000000,    title: 'Pengusaha Muda',      icon: '/sprites/tingkat 4.png', houseName: 'Rumah Cluster',    houseIcon: '🏘️', houseDesc: 'Rumah cluster modern di perumahan elite.' },
-  { min: 10000000000,   title: 'Konglomerat Lokal',   icon: '/sprites/tingkat 5.png', houseName: 'Villa Mewah',      houseIcon: '🏰', houseDesc: 'Villa 5 kamar dengan kolam renang pribadi.' },
-  { min: 100000000000,  title: 'Taipan Nusantara',    icon: '/sprites/tingkat 6.png', houseName: 'Mansion',          houseIcon: '🏯', houseDesc: 'Mansion 3 lantai dengan helipad dan garasi 10 mobil.' },
-  { min: 1000000000000, title: 'FINANCIAL EMPEROR',   icon: '/sprites/tingkat 7.png', houseName: 'Istana Pribadi',   houseIcon: '👑', houseDesc: 'Istana megah seluas 5 hektar. Puncak kemewahan.' },
+  { minLevel: 1,  title: 'Anak Kos Bokek',   icon: '/sprites/tingkat 1.png', houseName: 'Kamar Kos',       houseIcon: '🏚️', houseDesc: 'Kamar kos sempit 3x3 meter.' },
+  { minLevel: 50,  title: 'Karyawan Rajin',    icon: '/sprites/tingkat 2.png', houseName: 'Rumah Kontrakan', houseIcon: '🏠', houseDesc: 'Rumah kontrakan 2 kamar di pinggiran kota.' },
+  { minLevel: 100, title: 'Investor Pemula',   icon: '/sprites/tingkat 3.png', houseName: 'Rumah Subsidi',   houseIcon: '🏡', houseDesc: 'Rumah KPR subsidi dengan taman kecil.' },
+  { minLevel: 200, title: 'Pengusaha Muda',    icon: '/sprites/tingkat 4.png', houseName: 'Rumah Cluster',   houseIcon: '🏘️', houseDesc: 'Rumah cluster modern di perumahan elite.' },
+  { minLevel: 350, title: 'Konglomerat Lokal', icon: '/sprites/tingkat 5.png', houseName: 'Villa Mewah',     houseIcon: '🏰', houseDesc: 'Villa 5 kamar dengan kolam renang pribadi.' },
+  { minLevel: 500, title: 'Taipan Nusantara',  icon: '/sprites/tingkat 6.png', houseName: 'Mansion',         houseIcon: '🏯', houseDesc: 'Mansion 3 lantai dengan helipad dan garasi 10 mobil.' },
+  { minLevel: 750, title: 'FINANCIAL EMPEROR', icon: '/sprites/tingkat 7.png', houseName: 'Istana Pribadi',  houseIcon: '👑', houseDesc: 'Istana megah seluas 5 hektar. Puncak kemewahan.' },
 ];
 
 export const SAVE_KEY_PREFIX = 'stuckie_save_';
 export const SAVE_SLOTS = 3;
 
 export const INITIAL_STATE = {
-  balance: 500000000000,
+  balance: 200000000,
   portfolio: [],
   plots: [],
   realAssets: {},
@@ -176,6 +176,8 @@ export const INITIAL_STATE = {
   news: [],
   activeNews: null,
   gameTime: 0,
+  gameMonth: 1,  // 1-12
+  gameYear: 1,   // tahun ke-1, 2, 3, dst
   totalTrades: 0,
   xp: 0,
   level: 1,
@@ -194,45 +196,30 @@ export const useGameStore = create((set, get) => ({
   // ── Computed ──────────────────────────────────────────────
 
   getNetWorth: () => {
-    const { balance, marketAssets, portfolio, plots, realAssets } = get();
-    const portfolioVal = portfolio.reduce((sum, p) => {
-      const a = marketAssets.find(x => x.id === p.assetId);
-      return sum + (a ? a.price * p.qty : 0);
-    }, 0);
-    // plots value
-    const plotsVal = plots.length * REAL_ASSETS.find(a => a.id === 'tanah').baseCost * 0.7
-      + plots.flatMap(p => p.slots).reduce((sum, s) => {
-        const def = REAL_ASSETS.find(a => a.id === s.assetId);
-        return sum + (def ? def.baseCost * (s.qty ?? 1) * 0.7 : 0);
-      }, 0);
-    // non-land real assets (kendaraan, gaya hidup)
-    const realVal = Object.entries(realAssets).reduce((sum, [id, data]) => {
-      const def = REAL_ASSETS.find(a => a.id === id);
-      return sum + (def ? def.baseCost * (data.qty ?? 1) * 0.7 : 0);
-    }, 0);
-    return balance + portfolioVal + plotsVal + realVal;
+    return get().balance;
   },
 
   getPassiveIncome: () => {
+    // Mengembalikan rata-rata income per detik (untuk display)
     const { portfolio, marketAssets, marketUpgrades, plots, realAssets } = get();
     const upgradeMultiplier = 1 + marketUpgrades.reduce((s, u) => s + u.multiplier * u.owned, 0);
 
     const stockIncome = portfolio.reduce((total, p) => {
       const a = marketAssets.find(x => x.id === p.assetId);
-      return total + (a ? a.baseIncome * p.qty * upgradeMultiplier : 0);
+      const interval = a?.incomeInterval ?? 1;
+      return total + (a ? (a.baseIncome * p.qty * upgradeMultiplier) / interval : 0);
     }, 0);
 
-    // income from buildings on plots
     const plotIncome = plots.flatMap(p => p.slots).reduce((sum, s) => {
       const def = REAL_ASSETS.find(a => a.id === s.assetId);
-      if (!def || !def.incomePerSec) return sum;
-      return sum + def.incomePerSec * Math.pow(def.levelMultiplier, (s.level ?? 1) - 1);
+      if (!def?.incomePerSec) return sum;
+      const interval = def.incomeInterval ?? 1;
+      return sum + (def.incomePerSec * Math.pow(def.levelMultiplier, (s.level ?? 1) - 1)) / interval * interval;
     }, 0);
 
-    // income from non-land real assets
     const realIncome = Object.entries(realAssets).reduce((sum, [id, data]) => {
       const def = REAL_ASSETS.find(a => a.id === id);
-      if (!def || !def.incomePerSec) return sum;
+      if (!def?.incomePerSec) return sum;
       return sum + def.incomePerSec * Math.pow(def.levelMultiplier, data.level - 1) * (data.qty ?? 1);
     }, 0);
 
@@ -240,22 +227,65 @@ export const useGameStore = create((set, get) => ({
   },
 
   getPrestige: () => {
-    const nw = get().getNetWorth();
+    const { level } = get();
     let current = PRESTIGE_TITLES[0];
     for (const p of PRESTIGE_TITLES) {
-      if (nw >= p.min) current = p;
+      if (level >= p.minLevel) current = p;
     }
     return current;
   },
 
   // ── Tick ──────────────────────────────────────────────────
+  // 1 detik = 1 bulan game
+  // Income dibayar sesuai interval aset:
+  //   incomeInterval=1  → per bulan  (tiap 1 detik)
+  //   incomeInterval=3  → per 3 bulan (tiap 3 detik)
+  //   incomeInterval=6  → per 6 bulan (tiap 6 detik)
+  //   incomeInterval=12 → per tahun   (tiap 12 detik)
 
   tick: () => {
-    const income = get().getPassiveIncome();
+    const { gameTime, gameMonth, gameYear, portfolio, marketAssets, marketUpgrades, plots, realAssets } = get();
+    const newTime = gameTime + 1;
+    const newMonth = (gameMonth % 12) + 1;
+    const newYear = gameMonth === 12 ? gameYear + 1 : gameYear;
+
+    const upgradeMultiplier = 1 + marketUpgrades.reduce((s, u) => s + u.multiplier * u.owned, 0);
+
+    // Hitung income yang jatuh tempo bulan ini
+    let income = 0;
+
+    // Saham — per bulan (interval 1)
+    const stockIncome = portfolio.reduce((total, p) => {
+      const a = marketAssets.find(x => x.id === p.assetId);
+      return total + (a ? a.baseIncome * p.qty * upgradeMultiplier : 0);
+    }, 0);
+    income += stockIncome;
+
+    // Aset di plot — cek incomeInterval
+    plots.flatMap(p => p.slots).forEach(s => {
+      const def = REAL_ASSETS.find(a => a.id === s.assetId);
+      if (!def?.incomePerSec) return;
+      const interval = def.incomeInterval ?? 1;
+      if (newTime % interval === 0) {
+        income += def.incomePerSec * Math.pow(def.levelMultiplier, (s.level ?? 1) - 1) * interval;
+      }
+    });
+
+    // Aset non-land — cek incomeInterval
+    Object.entries(realAssets).forEach(([id, data]) => {
+      const def = REAL_ASSETS.find(a => a.id === id);
+      if (!def?.incomePerSec) return;
+      const interval = def.incomeInterval ?? 1;
+      if (newTime % interval === 0) {
+        income += def.incomePerSec * Math.pow(def.levelMultiplier, data.level - 1) * (data.qty ?? 1) * interval;
+      }
+    });
+
     set(s => ({
       pendingIncome: s.pendingIncome + income,
-      // gameTime increments every tick but EmpireScene only reads it every 60s
-      gameTime: s.gameTime + 1,
+      gameTime: newTime,
+      gameMonth: newMonth,
+      gameYear: newYear,
     }));
   },
 
@@ -505,10 +535,10 @@ export const useGameStore = create((set, get) => ({
   },
 
   saveToSlot: (slot) => {
-    const { balance, portfolio, plots, realAssets, luxuryItems, marketUpgrades, gameTime, totalTrades, xp, level, pendingIncome, priceHistory } = get();
+    const { balance, portfolio, plots, realAssets, luxuryItems, marketUpgrades, gameTime, gameMonth, gameYear, totalTrades, xp, level, pendingIncome, priceHistory } = get();
     const save = {
       balance, portfolio, plots, realAssets, luxuryItems,
-      marketUpgrades, gameTime, totalTrades, xp, level, pendingIncome, priceHistory,
+      marketUpgrades, gameTime, gameMonth, gameYear, totalTrades, xp, level, pendingIncome, priceHistory,
       savedAt: Date.now(),
     };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(save))));
@@ -558,6 +588,8 @@ export const useGameStore = create((set, get) => ({
         luxuryItems: save.luxuryItems ?? [],
         marketUpgrades: save.marketUpgrades ?? MARKET_UPGRADES,
         gameTime: save.gameTime ?? 0,
+        gameMonth: save.gameMonth ?? 1,
+        gameYear: save.gameYear ?? 1,
         totalTrades: save.totalTrades ?? 0,
         xp: save.xp ?? 0,
         level: save.level ?? 1,

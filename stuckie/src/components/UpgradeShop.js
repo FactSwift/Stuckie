@@ -23,7 +23,7 @@ export default function UpgradeShop() {
       <div className="flex items-center justify-between">
         <div className="text-amber-400 text-xs tracking-widest">▶ TOKO UPGRADE</div>
         <div className="text-xs text-green-400">
-          {Math.floor(totalPassive).toLocaleString('id')} Rp/detik
+          {Math.floor(totalPassive).toLocaleString('id')} Rp/bln
         </div>
       </div>
 

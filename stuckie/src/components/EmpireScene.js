@@ -178,10 +178,10 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
     const iv = setInterval(() => {
       const id = Date.now() + Math.random();
       const display = income >= 1e6
-        ? `+${(income / 1e6).toFixed(1)}jt/s`
+        ? `+${(income / 1e6).toFixed(1)}jt/bln`
         : income >= 1000
-        ? `+${(income / 1000).toFixed(1)}k/s`
-        : `+${Math.floor(income)}/s`;
+        ? `+${(income / 1000).toFixed(1)}k/bln`
+        : `+${Math.floor(income)}/bln`;
       setPops(p => [...p, { id, x: 8 + Math.random() * Math.max(width - 20, 10), y: 45 + Math.random() * 25, text: display }]);
       setTimeout(() => setPops(p => p.filter(pop => pop.id !== id)), 1400);
     }, Math.max(800, 2500 / colSpan));
@@ -293,7 +293,7 @@ function BuildingCell({ slot, colSpan, cellW, timeMode }) {
             <div className="text-zinc-400 text-xs">Lv.{slot.level ?? 1}</div>
             {income > 0 && (
               <div className="text-green-400 text-xs">
-                +{income >= 1e6 ? `${(income/1e6).toFixed(1)}jt` : income >= 1000 ? `${(income/1000).toFixed(1)}k` : Math.floor(income)}/s
+                +{income >= 1e6 ? `${(income/1e6).toFixed(1)}jt` : income >= 1000 ? `${(income/1000).toFixed(1)}k` : Math.floor(income)}/bln
               </div>
             )}
           </div>
@@ -362,7 +362,7 @@ function PlotRow({ plot, plotIndex, containerW, timeMode }) {
       <div className="flex items-center justify-between px-2 py-0.5 bg-zinc-900 border-b border-zinc-700">
         <span className="font-mono text-amber-400/70" style={{ fontSize: 8 }}>🟫 KAVLING #{plotIndex + 1}</span>
         {plotIncome > 0 && (
-          <span className="font-mono text-green-400" style={{ fontSize: 8 }}>+{fmt(plotIncome)}/s</span>
+          <span className="font-mono text-green-400" style={{ fontSize: 8 }}>+{fmt(plotIncome)}/bln</span>
         )}
       </div>
 
@@ -450,11 +450,18 @@ export default function EmpireScene() {
   const fmt = n => n >= 1e6 ? `${(n/1e6).toFixed(1)}jt` : n >= 1000 ? `${(n/1000).toFixed(1)}k` : Math.floor(n);
 
   if (plots.length === 0 && nonLandEntries.length === 0) {
+    // Tetap tampilkan kavling spesial meski belum ada aset
     return (
-      <div className="flex flex-col items-center justify-center border border-zinc-800 rounded-lg bg-zinc-950 font-mono py-8">
-        <div className="text-4xl mb-2">🏚️</div>
-        <div className="text-zinc-500 text-xs text-center px-4">
-          Empire masih kosong.<br />Beli kavling tanah di tab 🛒 Beli Aset!
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between font-mono">
+          <span className="text-amber-400 text-xs tracking-widest">▶ EMPIRE LIVE</span>
+          <span className="text-green-400 text-xs">+0 Rp/bln</span>
+        </div>
+        <div ref={containerRef} className="rounded-lg border border-zinc-700 overflow-hidden">
+          <PrestigePlot containerW={containerW} timeMode={timeMode} />
+          <div className="text-zinc-600 text-xs text-center py-3 border-t border-zinc-800">
+            Beli kavling tanah di tab 🛒 Beli Aset untuk membangun empire!
+          </div>
         </div>
       </div>
     );
@@ -466,7 +473,7 @@ export default function EmpireScene() {
         <span className="text-amber-400 text-xs tracking-widest">▶ EMPIRE LIVE</span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-400">{timeMode.label}</span>
-          <span className="text-green-400 text-xs">+{fmt(totalIncome)} Rp/s</span>
+          <span className="text-green-400 text-xs">+{fmt(totalIncome)} Rp/bln</span>
         </div>
       </div>
 
