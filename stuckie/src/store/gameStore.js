@@ -168,7 +168,7 @@ export const SAVE_KEY_PREFIX = 'stuckie_save_';
 export const SAVE_SLOTS = 3;
 
 export const INITIAL_STATE = {
-  balance: 200000000,
+  balance: 10000000, // modal awal 10 juta
   portfolio: [],
   plots: [],
   realAssets: {},
