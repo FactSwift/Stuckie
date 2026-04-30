@@ -19,7 +19,6 @@ const TABS = [
   { id: 'upgrade',  label: '⚡',  name: 'UPGRADE'     },
   { id: 'news',     label: '📡',  name: 'BERITA'      },
   { id: 'whatif',   label: '🔮',  name: 'SIMULASI'    },
-  { id: 'scout',    label: '🤖',  name: 'AI SCOUT'    },
 ];
 
 export default function Home() {
@@ -29,6 +28,7 @@ export default function Home() {
   const { tick, triggerNews, level, pendingIncome, getPassiveIncome, saveToSlot, currentSlot, getSlotMeta, exportSave } = useGameStore();
   const [showSave, setShowSave] = useState(false);
   const [saveToast, setSaveToast] = useState(null);
+  const [showScout, setShowScout] = useState(false);
 
   const handleSave = (slot) => {
     saveToSlot(slot);
@@ -141,7 +141,6 @@ export default function Home() {
           {activeTab === 'upgrade'  && <UpgradeShop />}
           {activeTab === 'news'     && <NewsFeed />}
           {activeTab === 'whatif'   && <WhatIfSimulator />}
-          {activeTab === 'scout'    && <AIScout />}
         </div>
       </main>
 
@@ -207,6 +206,40 @@ export default function Home() {
       {saveToast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded border border-green-500 bg-green-900 font-mono text-sm text-green-300">
           {saveToast}
+        </div>
+      )}
+
+      {/* AI Scout floating button */}
+      <button
+        onClick={() => setShowScout(s => !s)}
+        className="fixed bottom-20 right-4 z-[60] w-12 h-12 rounded-full border-2 border-cyan-400 bg-zinc-950 text-2xl flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
+        style={{ boxShadow: showScout ? '0 0 20px #22d3ee88' : '0 0 10px #22d3ee44' }}
+        title="AI Scout"
+      >
+        🤖
+      </button>
+
+      {/* AI Scout popup — kiri dari tombol, tidak terpotong */}
+      {showScout && (
+        <div className="fixed z-[60] w-96 max-w-[calc(100vw-2rem)] h-[480px] border border-cyan-400/50 rounded-xl bg-zinc-950 shadow-2xl flex flex-col overflow-hidden"
+          style={{
+            bottom: 64,
+            right: 64,
+            boxShadow: '0 0 30px rgba(34,211,238,0.15)',
+          }}>
+          {/* Popup header */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 bg-zinc-900 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🤖</span>
+              <span className="text-cyan-400 font-mono text-xs font-bold tracking-widest">AI SCOUT</span>
+            </div>
+            <button onClick={() => setShowScout(false)}
+              className="text-zinc-500 hover:text-white transition-colors text-lg px-1">✕</button>
+          </div>
+          {/* Chat content */}
+          <div className="flex-1 overflow-hidden p-3">
+            <AIScout />
+          </div>
         </div>
       )}
     </div>

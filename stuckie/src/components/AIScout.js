@@ -154,7 +154,7 @@ export default function AIScout() {
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto border border-zinc-800 rounded p-2 bg-zinc-900/50">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap
+            <div className={`max-w-[85%] rounded px-3 py-2 text-xs leading-relaxed break-words overflow-hidden
               ${m.role === 'user'
                 ? 'bg-amber-400/20 border border-amber-400/50 text-amber-200'
                 : 'bg-zinc-800 border border-zinc-700 text-zinc-300'
