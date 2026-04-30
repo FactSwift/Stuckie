@@ -29,7 +29,7 @@ export default function SwipeCard({ asset, onSwipeLeft, onSwipeRight }) {
       exit={{ x: dragX > 0 ? 500 : -500, opacity: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       style={{
-        rotate: dragX * 0.1,
+        rotate: Math.max(-15, Math.min(15, dragX * 0.05)),
       }}
       className="relative w-full max-w-xs mx-auto cursor-grab active:cursor-grabbing"
     >

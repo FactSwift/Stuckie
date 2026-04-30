@@ -2,7 +2,6 @@
 
 import { useGameStore } from '@/store/gameStore';
 import SwipeDeck from './SwipeDeck';
-import AssetDetailModal from './AssetDetailModal';
 import PortfolioPanel from './PortfolioPanel';
 
 export default function Terminal() {
@@ -37,7 +36,6 @@ export default function Terminal() {
       {/* Swipe Deck */}
       <div className="flex-1 flex items-center justify-center relative overflow-hidden">
         <SwipeDeck />
-        <AssetDetailModal />
       </div>
 
       {/* Portfolio Panel */}

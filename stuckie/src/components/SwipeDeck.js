@@ -2,21 +2,22 @@
 import { useGameStore } from '@/store/gameStore';
 import SwipeCard from './SwipeCard';
 import { AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import AssetDetailModal from './AssetDetailModal';
 
 export default function SwipeDeck() {
-  const { marketAssets: assets, currentIndex, swipeLeft, swipeRight, resetDeck } = useGameStore();
+  const { marketAssets: assets } = useGameStore();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const currentAsset = assets[currentIndex];
 
-  const handleSwipeLeft = () => {
-    console.log('Swiped LEFT - Skipping asset:', currentAsset?.id);
-    swipeLeft();
-  };
-
+  const handleSwipeLeft = () => setCurrentIndex(i => i + 1);
   const handleSwipeRight = () => {
-    console.log('Swiped RIGHT - Investigating asset:', currentAsset?.id);
-    swipeRight(currentAsset);
+    setSelectedAsset(currentAsset);
+    setCurrentIndex(i => i + 1);
   };
+  const resetDeck = () => setCurrentIndex(0);
 
   if (!currentAsset) {
     return (
@@ -53,6 +54,13 @@ export default function SwipeDeck() {
       <div className="text-xs text-zinc-700 font-mono text-center">
         Drag card left or right to continue
       </div>
+
+      {selectedAsset && (
+        <AssetDetailModal
+          asset={selectedAsset}
+          onClose={() => setSelectedAsset(null)}
+        />
+      )}
     </div>
   );
 }
