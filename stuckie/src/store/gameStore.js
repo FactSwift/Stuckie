@@ -1,12 +1,12 @@
-import { create } from 'zustand';
+  import { create } from 'zustand';
 
 export const MARKET_ASSETS = [
-  { id: 'BBCA', name: 'Bank BCA', type: 'Saham', price: 9500, change: 0, description: 'Blue chip perbankan terbesar.', baseIncome: 600 },
-  { id: 'TLKM', name: 'Telkom Indonesia', type: 'Saham', price: 3200, change: 0, description: 'BUMN telekomunikasi.', baseIncome: 400 },
-  { id: 'GOTO', name: 'GoTo Group', type: 'Saham', price: 71, change: 0, description: 'Startup unicorn. High risk.', baseIncome: 150 },
-  { id: 'SBN001', name: 'SBN ORI023', type: 'SBN', price: 1000000, change: 0, description: 'Obligasi negara. Dijamin pemerintah.', baseIncome: 10000, incomeInterval: 6 },
-  { id: 'RDPU', name: 'RD Pasar Uang', type: 'Reksa Dana', price: 1500, change: 0, description: 'Risiko rendah. ~5% p.a.', baseIncome: 250 },
-  { id: 'RDSH', name: 'RD Saham', type: 'Reksa Dana', price: 2800, change: 0, description: 'Potensi return tinggi.', baseIncome: 450 },
+  { id: 'BBCA', name: 'Bank BCA', type: 'Saham', price: 9500, change: 0, description: 'Blue chip perbankan terbesar.', baseIncome: 12, trend: 'Stabil', risk: 2, sentiment: 'neutral' },
+  { id: 'TLKM', name: 'Telkom Indonesia', type: 'Saham', price: 3200, change: 0, description: 'BUMN telekomunikasi.', baseIncome: 8, trend: 'Naik perlahan', risk: 2, sentiment: 'bullish' },
+  { id: 'GOTO', name: 'GoTo Group', type: 'Saham', price: 71, change: 0, description: 'Startup unicorn. High risk.', baseIncome: 3, trend: 'Volatil', risk: 5, sentiment: 'bearish' },
+  { id: 'SBN001', name: 'SBN ORI023', type: 'SBN', price: 1000000, change: 0, description: 'Obligasi negara. Dijamin pemerintah.', baseIncome: 50, trend: 'Stabil', risk: 1, sentiment: 'neutral' },
+  { id: 'RDPU', name: 'RD Pasar Uang', type: 'Reksa Dana', price: 1500, change: 0, description: 'Risiko rendah. ~5% p.a.', baseIncome: 5, trend: 'Stabil', risk: 1, sentiment: 'neutral' },
+  { id: 'RDSH', name: 'RD Saham', type: 'Reksa Dana', price: 2800, change: 0, description: 'Potensi return tinggi.', baseIncome: 9, trend: 'Naik', risk: 4, sentiment: 'bullish' },
 ];
 
 // Real-world purchasable assets (tycoon style)
@@ -183,13 +183,14 @@ export const INITIAL_STATE = {
   level: 1,
   pendingIncome: 0,
   priceHistory: Object.fromEntries(MARKET_ASSETS.map(a => [a.id, [a.price]])),
+  currentIndex: 0,
+  selectedAsset: null,
 };
 
 export const useGameStore = create((set, get) => ({
   ...INITIAL_STATE,
   marketAssets: MARKET_ASSETS,
   marketUpgrades: MARKET_UPGRADES,
-  floatingTexts: [],
   currentSlot: null, // which save slot is active
   floatingTexts: [],
 
@@ -354,6 +355,71 @@ export const useGameStore = create((set, get) => ({
     set(s => ({ balance: s.balance + total, portfolio: newPortfolio, totalTrades: s.totalTrades + 1, xp: s.xp + 30 }));
     get().checkLevelUp();
     return { success: true, msg: `💰 Jual ${qty} lot ${asset.name}` };
+  },
+
+  // ── Simple Buy/Sell (single unit) ─────────────────────────
+
+  buyAsset: (asset) => {
+  const { balance, portfolio } = get();
+  const cost = asset.price;
+
+  if (balance < cost) {
+    return { success: false, msg: 'Saldo tidak cukup!' };
+  }
+
+  const existing = portfolio.find(p => p.assetId === asset.id);
+
+  const newPortfolio = existing
+    ? portfolio.map(p =>
+        p.assetId === asset.id
+          ? {
+              ...p,
+              qty: (p.qty ?? 1) + 1,
+              avgPrice:
+                ((p.avgPrice ?? p.buyPrice ?? asset.price) * (p.qty ?? 1) + cost) /
+                ((p.qty ?? 1) + 1),
+            }
+          : p
+      )
+    : [
+        ...portfolio,
+        {
+          assetId: asset.id,
+          qty: 1,
+          avgPrice: asset.price,
+        },
+      ];
+
+  set(s => ({
+    balance: s.balance - cost,
+    portfolio: newPortfolio,
+    totalTrades: s.totalTrades + 1,
+    xp: s.xp + 50,
+  }));
+
+  get().checkLevelUp();
+
+  return { success: true, msg: `✅ Beli ${asset.name}` };
+},
+
+  sellAsset: (portfolioId) => {
+    const { portfolio, balance } = get();
+    const item = portfolio.find(p => p.id === portfolioId);
+    if (!item) {
+      return { success: false, msg: 'Aset tidak ditemukan' };
+    }
+
+    const sellPrice = item.price;
+    const newPortfolio = portfolio.filter(p => p.id !== portfolioId);
+
+    set(s => ({
+      balance: s.balance + sellPrice,
+      portfolio: newPortfolio,
+      totalTrades: s.totalTrades + 1,
+      xp: s.xp + 30,
+    }));
+    get().checkLevelUp();
+    return { success: true, msg: `💰 Jual ${item.name}` };
   },
 
   // ── Land helpers ──────────────────────────────────────────
@@ -595,6 +661,8 @@ export const useGameStore = create((set, get) => ({
         level: save.level ?? 1,
         pendingIncome: save.pendingIncome ?? 0,
         priceHistory: save.priceHistory ?? INITIAL_STATE.priceHistory,
+        currentIndex: save.currentIndex ?? 0,
+        selectedAsset: null,
         currentSlot: slot,
       });
       return true;
@@ -642,5 +710,32 @@ export const useGameStore = create((set, get) => ({
       news: [{ ...randomNews, time: new Date().toLocaleTimeString('id') }, ...news.slice(0, 9)],
       priceHistory: newHistory,
     });
+  },
+
+  // ── Swipe Deck ────────────────────────────────────────────
+
+  swipeLeft: () => {
+    const { currentIndex, marketAssets } = get();
+    if (currentIndex < marketAssets.length - 1) {
+      set({ currentIndex: currentIndex + 1, selectedAsset: null });
+    }
+  },
+
+  swipeRight: (asset) => {
+    // Open asset detail modal WITHOUT incrementing index
+    set({ selectedAsset: asset });
+  },
+
+  closeDetail: () => {
+    const { currentIndex, marketAssets } = get();
+    // Close modal and move to next asset
+    set({ selectedAsset: null });
+    if (currentIndex < marketAssets.length - 1) {
+      set(s => ({ currentIndex: s.currentIndex + 1 }));
+    }
+  },
+
+  resetDeck: () => {
+    set({ currentIndex: 0, selectedAsset: null });
   },
 }));
