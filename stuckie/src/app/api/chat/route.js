@@ -1,15 +1,42 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 
-const client = new OpenAI({
-  apiKey: process.env.AZURE_OPENAI_KEY,
-  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
-  defaultQuery: { 'api-version': '2024-02-01' },
-  defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_KEY },
-});
+let client;
+
+function normalizeEndpoint(endpoint) {
+  try {
+    const url = new URL(endpoint);
+    return `${url.origin}/`;
+  } catch {
+    return endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
+  }
+}
+
+function getOpenAIClient() {
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  const apiKey = process.env.AZURE_OPENAI_KEY;
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT;
+
+  if (!endpoint || !apiKey || !deployment) {
+    throw new Error('Missing Azure OpenAI configuration.');
+  }
+
+  if (!client) {
+    const baseURL = `${normalizeEndpoint(endpoint)}openai/deployments/${deployment}`;
+    client = new OpenAI({
+      apiKey,
+      baseURL,
+      defaultQuery: { 'api-version': '2024-02-01' },
+      defaultHeaders: { 'api-key': apiKey },
+    });
+  }
+
+  return client;
+}
 
 export async function POST(req) {
   try {
+    const client = getOpenAIClient();
     const { messages, context } = await req.json();
 
     const systemPrompt = context
