@@ -159,7 +159,7 @@ export default function AIScout() {
                 ? 'bg-amber-400/20 border border-amber-400/50 text-amber-200'
                 : 'bg-zinc-800 border border-zinc-700 text-zinc-300'
               }`}>
-              {m.role === 'ai' && <span className="text-cyan-400 font-bold mr-1">AI:</span>}
+              {m.role === 'ai' && <span className="text-cyan-400 font-bold mr-1">Scout:</span>}
               {m.text}
             </div>
           </div>
