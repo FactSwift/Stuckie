@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { useGameStore, REAL_ASSETS } from '@/store/gameStore';
 
-const CATEGORIES = ['Semua', 'Properti', 'Kendaraan', 'Bisnis', 'Gaya Hidup'];
+const CATEGORIES = ['Semua', 'Tanah', 'Properti', 'Bisnis', 'Gaya Hidup'];
 
 const COLOR_MAP = {
   amber:  { border: 'border-amber-500/60',  bg: 'bg-amber-500/10',  text: 'text-amber-400',  btn: 'border-amber-400 text-amber-400 hover:bg-amber-400/20' },
@@ -21,7 +21,7 @@ function formatRp(n) {
 }
 
 export default function TycoonWorld() {
-  const { balance, realAssets, plots, buyRealAsset, upgradeRealAsset, addFloatingText, getLandStats } = useGameStore();
+  const { balance, realAssets, plots, buyRealAsset, upgradeRealAsset, addFloatingText, getLandStats, luxuryItems } = useGameStore();
   const [cat, setCat] = useState('Semua');
   const [buyQty, setBuyQty] = useState(1);
   const [toast, setToast] = useState(null);
@@ -65,58 +65,60 @@ export default function TycoonWorld() {
   const filtered = cat === 'Semua' ? REAL_ASSETS : REAL_ASSETS.filter(a => a.category === cat);
 
   return (
-    <div className="flex flex-col gap-3 h-full font-mono">
-      <div className="flex items-center justify-between">
-        <div className="text-amber-400 text-xs tracking-widest">▶ TYCOON WORLD</div>
-        <div className="text-xs text-green-400">Cash: {formatRp(balance)}</div>
-      </div>
-
-      {/* Category Filter */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {CATEGORIES.map(c => (
-          <button key={c} onClick={() => setCat(c)}
-            className={`shrink-0 text-xs px-3 py-1 rounded-full border transition-all
-              ${cat === c ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-zinc-700 text-zinc-500 hover:border-zinc-500'}`}>
-            {c}
-          </button>
-        ))}
-      </div>
-
-      {/* Buy Qty Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-zinc-500 text-xs">BELI:</span>
-        {QTY_PRESETS.map(q => (
-          <button key={q} onClick={() => setBuyQty(q)}
-            className={`text-xs px-2.5 py-1 rounded border transition-all
-              ${buyQty === q ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-zinc-700 text-zinc-500 hover:border-zinc-500'}`}>
-            x{q}
-          </button>
-        ))}
-        <input
-          type="number" min={1} value={buyQty}
-          onChange={e => setBuyQty(Math.max(1, parseInt(e.target.value) || 1))}
-          className="w-14 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-amber-400 outline-none focus:border-amber-400"
-        />
-      </div>
-
-      {/* Land Capacity Bar */}
-      <div className="border border-zinc-700 rounded p-2 bg-zinc-900">
-        <div className="flex justify-between text-xs mb-1">
-          <span className="text-amber-400">🟫 KAPASITAS TANAH</span>
-          <span className={freeCapacity <= 0 && totalCapacity > 0 ? 'text-red-400' : 'text-zinc-400'}>
-            {usedCapacity} / {totalCapacity} poin
-            {totalCapacity === 0 && <span className="text-red-400 ml-1">— Beli tanah dulu!</span>}
-          </span>
+    <div className="flex flex-col h-full font-mono">
+      <div className="shrink-0 flex flex-col gap-3 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="text-amber-400 text-xs tracking-widest">▶ BELI ASET</div>
+          <div className="text-xs text-green-400">Cash: {formatRp(balance)}</div>
         </div>
-        <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${landPct >= 100 ? 'bg-red-500' : landPct >= 75 ? 'bg-yellow-500' : 'bg-green-500'}`}
-            style={{ width: `${Math.min(landPct, 100)}%` }}
+
+        {/* Category Filter */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {CATEGORIES.map(c => (
+            <button key={c} onClick={() => setCat(c)}
+              className={`shrink-0 text-xs px-3 py-1 rounded-full border transition-all
+                ${cat === c ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-zinc-700 text-zinc-500 hover:border-zinc-500'}`}>
+              {c}
+            </button>
+          ))}
+        </div>
+
+        {/* Buy Qty Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-500 text-xs">BELI:</span>
+          {QTY_PRESETS.map(q => (
+            <button key={q} onClick={() => setBuyQty(q)}
+              className={`text-xs px-2.5 py-1 rounded border transition-all
+                ${buyQty === q ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-zinc-700 text-zinc-500 hover:border-zinc-500'}`}>
+              x{q}
+            </button>
+          ))}
+          <input
+            type="number" min={1} value={buyQty}
+            onChange={e => setBuyQty(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-14 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-amber-400 outline-none focus:border-amber-400"
           />
         </div>
-        <div className="text-xs text-zinc-600 mt-1">
-          Sisa: <span className={freeCapacity > 0 ? 'text-green-400' : 'text-red-400'}>{freeCapacity} poin</span>
-          {' · '}Tiap kavling = 6 poin kapasitas
+
+        {/* Land Capacity Bar */}
+        <div className="border border-zinc-700 rounded p-2 bg-zinc-900">
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-amber-400">🟫 KAPASITAS TANAH</span>
+            <span className={freeCapacity <= 0 && totalCapacity > 0 ? 'text-red-400' : 'text-zinc-400'}>
+              {usedCapacity} / {totalCapacity} poin
+              {totalCapacity === 0 && <span className="text-red-400 ml-1">— Beli tanah dulu!</span>}
+            </span>
+          </div>
+          <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${landPct >= 100 ? 'bg-red-500' : landPct >= 75 ? 'bg-yellow-500' : 'bg-green-500'}`}
+              style={{ width: `${Math.min(landPct, 100)}%` }}
+            />
+          </div>
+          <div className="text-xs text-zinc-600 mt-1">
+            Sisa: <span className={freeCapacity > 0 ? 'text-green-400' : 'text-red-400'}>{freeCapacity} poin</span>
+            {' · '}Tiap kavling = 6 poin kapasitas
+          </div>
         </div>
       </div>
 
@@ -124,13 +126,16 @@ export default function TycoonWorld() {
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 pr-1" ref={containerRef}>
         {filtered.map(def => {
           // Get owned data from correct source
-          const ownedRaw = def.landCost > 0 || def.id === 'tanah'
+          const isLuxury = def.isLuxury;
+          const luxuryOwned = isLuxury && luxuryItems.includes(def.id);
+          const ownedRaw = isLuxury ? null
+            : def.landCost > 0 || def.id === 'tanah'
             ? (def.id === 'tanah' ? { qty: plots.length, level: 1 } : getPlotOwned(def.id))
             : realAssets[def.id];
-          const qty = ownedRaw?.qty ?? 0;
+          const qty = luxuryOwned ? 1 : (ownedRaw?.qty ?? 0);
           const level = ownedRaw?.level ?? 1;
-          const isOwned = qty > 0;
-          const isMaxed = isOwned && level >= def.maxLevel;
+          const isOwned = luxuryOwned || qty > 0;
+          const isMaxed = isLuxury ? luxuryOwned : (isOwned && level >= def.maxLevel);
           const buyCost = def.baseCost * buyQty;
           const upgradeCost = isOwned
             ? Math.floor(def.baseCost * Math.pow(def.upgradeCostMultiplier, level) * qty)
@@ -187,11 +192,11 @@ export default function TycoonWorld() {
                     <div className="text-xs mt-1">
                       {isOwned ? (
                         <span className="text-green-400">
-                          +{formatRp(currentIncome)}/s total
-                          <span className="text-zinc-600 ml-1">({formatRp(def.incomePerSec * Math.pow(def.levelMultiplier, level - 1))}/s per unit)</span>
+                          +{formatRp(currentIncome)}/bln total
+                          <span className="text-zinc-600 ml-1">({formatRp(def.incomePerSec * Math.pow(def.levelMultiplier, level - 1))}/bln per unit)</span>
                         </span>
                       ) : (
-                        <span className="text-zinc-600">+{formatRp(def.incomePerSec)}/s per unit</span>
+                        <span className="text-zinc-600">+{formatRp(def.incomePerSec)}/bln per unit</span>
                       )}
                     </div>
                   )}

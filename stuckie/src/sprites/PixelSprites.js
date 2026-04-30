@@ -39,11 +39,12 @@ export function PixelArt({ pixels, scale = PIXEL_SIZE, style = {} }) {
 // ─── Color Palette ────────────────────────────────────────────────────────────
 export const PALETTE = {
   // Skin tones
-  's': '#f4a460', // skin
+  's': '#f4c99a', // skin peach (lighter, matches reference)
   'S': '#d2691e', // dark skin
   // Hair
   'h': '#4a2800', // dark brown hair
   'H': '#8b4513', // brown hair
+  'R': '#c0392b', // red-brown hair (reference character)
   'y': '#ffd700', // blonde
   'w': '#ffffff', // white
   // Clothes
@@ -84,125 +85,188 @@ export const PALETTE = {
   '4': '#ffffaa', // light yellow
 };
 
-// ─── NPC Sprites (16px tall, walking cycle) ───────────────────────────────────
+// ─── NPC Sprites (pixel art walk cycle — recreated from reference) ────────────
 
-// Frame 1 & 2 for walk cycle
 export const NPC_SPRITES = {
-  // Generic person - frame1 (left foot forward)
+  // Frame 1 — kaki kiri maju
   person_f1: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.bbb.
-XbbbX
-XbbbX
-.b.b.
-.X.X.
+....RRRR..
+...RRRRRRR
+....ssss..
+....sXs...
+...XwwwX..
+..XwwwwX..
+...XwwX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
-  // Generic person - frame2 (right foot forward)
+  // Frame 2 — kaki kanan maju
   person_f2: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.bbb.
-XbbbX
-XbbbX
-.b.b.
-X.X..
+....RRRR..
+...RRRRRRR
+....ssss..
+....sXs...
+...XwwwX..
+..XwwwwX..
+...XwwX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Cook (white hat)
+  // Frame 3 — badan condong (mid-stride)
+  person_f3: `
+...RRRR...
+..RRRRRRR.
+...ssss...
+...sXs....
+..XwwwX...
+.XwwwwX...
+..XwwX....
+...KKK....
+..bbbK....
+..bbb.....
+..bKb.....
+.KK..K....
+`,
+  // Frame 4 — kaki kanan maju balik
+  person_f4: `
+...RRRR...
+..RRRRRRR.
+...ssss...
+...sXs....
+..XwwwX...
+.XwwwwX...
+..XwwX....
+...KKK....
+..KbKb....
+...bbb....
+...bKb....
+...K.KK...
+`,
+
+  // Cook — rambut putih, apron
   cook_f1: `
-.www.
-XwwwX
-XsssX
-.XsX.
-.rrr.
-XrrrX
-XrrrX
-.r.r.
-.X.X.
+....wwww..
+...wwwwwww
+....ssss..
+....sXs...
+...XrrrX..
+..XrrrrX..
+...XrrX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   cook_f2: `
-.www.
-XwwwX
-XsssX
-.XsX.
-.rrr.
-XrrrX
-XrrrX
-.r.r.
-X.X..
+....wwww..
+...wwwwwww
+....ssss..
+....sXs...
+...XrrrX..
+..XrrrrX..
+...XrrX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Business person (suit)
+
+  // Exec — rambut hitam, jas hitam
   exec_f1: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.KKK.
-XKKKX
-XKKKX
-.K.K.
-.X.X.
+....KKKK..
+...KKKKKKK
+....ssss..
+....sXs...
+...XKKKX..
+..XKKKKX..
+...XKKX...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   exec_f2: `
-.XXX.
-XsssX
-XsssX
-.XhX.
-.KKK.
-XKKKX
-XKKKX
-.K.K.
-X.X..
+....KKKK..
+...KKKKKKK
+....ssss..
+....sXs...
+...XKKKX..
+..XKKKKX..
+...XKKX...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
-  // Worker (hard hat)
+
+  // Worker — helm kuning
   worker_f1: `
-.YYY.
-XYYyX
-XsssX
-.XsX.
-.nnn.
-XnnnX
-XnnnX
-.n.n.
-.X.X.
+...YYYYY..
+..YYYYYYs.
+....ssss..
+....sXs...
+...XnnnX..
+..XnnnnX..
+...XnnX...
+....KK....
+...nnnK...
+...nnn....
+...nKn....
+..KK.K....
 `,
   worker_f2: `
-.YYY.
-XYYyX
-XsssX
-.XsX.
-.nnn.
-XnnnX
-XnnnX
-.n.n.
-X.X..
+...YYYYY..
+..YYYYYYs.
+....ssss..
+....sXs...
+...XnnnX..
+..XnnnnX..
+...XnnX...
+....KK....
+...KnKn...
+....nnn...
+....nKn...
+....K.KK..
 `,
-  // Shopper (bag)
+
+  // Shopper — rambut kuning, baju pink
   shopper_f1: `
-.XXX.
-XsssX
-XsssX
-.XyX.
-.ppp.
-XpppX
-XpppX
-.p.p.
-.X.X.
+....yyyy..
+...yyyyyyy
+....ssss..
+....sXs...
+...X1111X.
+..X11111X.
+...X11X...
+....KK....
+...bbbK...
+...bbb....
+...bKb....
+..KK.K....
 `,
   shopper_f2: `
-.XXX.
-XsssX
-XsssX
-.XyX.
-.ppp.
-XpppX
-XpppX
-.p.p.
-X.X..
+....yyyy..
+...yyyyyyy
+....ssss..
+....sXs...
+...X1111X.
+..X11111X.
+...X11X...
+....KK....
+...KbKb...
+....bbb...
+....bKb...
+....K.KK..
 `,
 };
 
@@ -631,77 +695,50 @@ TTTTTTT
 };
 
 // ─── Environment config per asset type ───────────────────────────────────────
-// Each entry: array of { sprite, x (% from left), bottom (px from ground), scale }
 export const ASSET_ENV = {
   kos: [
-    { sprite: 'tree_small', x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'tree_small', x: 80, bottom: 20, scale: 2 },
-    { sprite: 'fence',      x: 0,  bottom: 20, scale: 2 },
-    { sprite: 'bush',       x: 55, bottom: 20, scale: 2 },
+    { sprite: 'tree_small', x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'tree_small', x: 82, bottom: 22, scale: 6 },
   ],
   warung: [
-    { sprite: 'tree_small', x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'flower_pot', x: 70, bottom: 20, scale: 2 },
-    { sprite: 'bench',      x: 50, bottom: 20, scale: 2 },
+    { sprite: 'tree_small', x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 82, bottom: 22, scale: 6 },
   ],
   cafe: [
-    { sprite: 'flower_pot', x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'flower_pot', x: 75, bottom: 20, scale: 2 },
-    { sprite: 'bench',      x: 45, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 85, bottom: 20, scale: 2 },
+    { sprite: 'street_lamp',x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'tree_small', x: 82, bottom: 22, scale: 6 },
   ],
   ruko: [
-    { sprite: 'street_lamp',x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'bush',       x: 70, bottom: 20, scale: 2 },
+    { sprite: 'street_lamp',x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 82, bottom: 22, scale: 6 },
   ],
   apartemen: [
-    { sprite: 'tree_big',   x: 3,  bottom: 20, scale: 2 },
-    { sprite: 'tree_big',   x: 82, bottom: 20, scale: 2 },
-    { sprite: 'garden',     x: 30, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 15, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 72, bottom: 20, scale: 2 },
-    { sprite: 'bench',      x: 45, bottom: 20, scale: 2 },
+    { sprite: 'tree_big',   x: 2,  bottom: 22, scale: 7 },
+    { sprite: 'tree_big',   x: 84, bottom: 22, scale: 7 },
+    { sprite: 'street_lamp',x: 10, bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 78, bottom: 22, scale: 6 },
   ],
   startup: [
-    { sprite: 'tree_big',   x: 3,  bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 20, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 75, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 55, bottom: 20, scale: 2 },
+    { sprite: 'tree_big',   x: 2,  bottom: 22, scale: 7 },
+    { sprite: 'street_lamp',x: 82, bottom: 22, scale: 6 },
   ],
   gedung: [
-    { sprite: 'tree_big',   x: 2,  bottom: 20, scale: 2 },
-    { sprite: 'tree_big',   x: 88, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 10, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 80, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 35, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 55, bottom: 20, scale: 2 },
-    { sprite: 'fountain',   x: 45, bottom: 20, scale: 2 },
+    { sprite: 'tree_big',   x: 2,  bottom: 22, scale: 7 },
+    { sprite: 'tree_big',   x: 85, bottom: 22, scale: 7 },
+    { sprite: 'street_lamp',x: 10, bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 78, bottom: 22, scale: 6 },
   ],
   pabrik: [
-    { sprite: 'street_lamp',x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 85, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 60, bottom: 20, scale: 2 },
-    { sprite: 'fence',      x: 0,  bottom: 20, scale: 2 },
+    { sprite: 'street_lamp',x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 85, bottom: 22, scale: 6 },
   ],
   mall: [
-    { sprite: 'car_parked', x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 18, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 31, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 60, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 73, bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 86, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 44, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 52, bottom: 20, scale: 2 },
-    { sprite: 'zebra',      x: 46, bottom: 20, scale: 2 },
+    { sprite: 'street_lamp',x: 3,  bottom: 22, scale: 6 },
+    { sprite: 'street_lamp',x: 85, bottom: 22, scale: 6 },
   ],
   bank: [
-    { sprite: 'car_parked', x: 5,  bottom: 20, scale: 2 },
-    { sprite: 'car_parked', x: 18, bottom: 20, scale: 2 },
-    { sprite: 'tree_big',   x: 40, bottom: 20, scale: 2 },
-    { sprite: 'tree_big',   x: 75, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 30, bottom: 20, scale: 2 },
-    { sprite: 'street_lamp',x: 65, bottom: 20, scale: 2 },
-    { sprite: 'fountain',   x: 50, bottom: 20, scale: 2 },
+    { sprite: 'tree_big',   x: 2,  bottom: 22, scale: 7 },
+    { sprite: 'street_lamp',x: 85, bottom: 22, scale: 6 },
   ],
 };
 

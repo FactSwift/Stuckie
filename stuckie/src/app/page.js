@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import Terminal from '@/components/Terminal';
 import NewsFeed from '@/components/NewsFeed';
@@ -13,13 +13,12 @@ import FloatingTexts from '@/components/FloatingTexts';
 import StartScreen from '@/components/StartScreen';
 
 const TABS = [
-  { id: 'hq',       label: '🏠',  name: 'HQ'       },
-  { id: 'world',    label: '🌏',  name: 'WORLD'    },
-  { id: 'terminal', label: '📊',  name: 'MARKET'   },
-  { id: 'upgrade',  label: '⚡',  name: 'UPGRADE'  },
-  { id: 'news',     label: '📡',  name: 'INTEL'    },
-  { id: 'whatif',   label: '🔮',  name: 'WHAT-IF'  },
-  { id: 'scout',    label: '🤖',  name: 'AI SCOUT' },
+  { id: 'hq',       label: '🌍',  name: 'DUNIA'       },
+  { id: 'world',    label: '🛒',  name: 'BELI ASET'   },
+  { id: 'terminal', label: '📊',  name: 'PASAR'       },
+  { id: 'upgrade',  label: '⚡',  name: 'UPGRADE'     },
+  { id: 'news',     label: '📡',  name: 'BERITA'      },
+  { id: 'whatif',   label: '🔮',  name: 'SIMULASI'    },
 ];
 
 export default function Home() {
@@ -29,6 +28,8 @@ export default function Home() {
   const { tick, triggerNews, level, pendingIncome, getPassiveIncome, saveToSlot, currentSlot, getSlotMeta, exportSave } = useGameStore();
   const [showSave, setShowSave] = useState(false);
   const [saveToast, setSaveToast] = useState(null);
+  const [showScout, setShowScout] = useState(false);
+  const scoutPopupRef = useRef(null);
 
   const handleSave = (slot) => {
     saveToSlot(slot);
@@ -75,6 +76,18 @@ export default function Home() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [started, saveToSlot, currentSlot]);
 
+  // Close scout popup on outside click
+  useEffect(() => {
+    if (!showScout) return;
+    const handleClickOutside = (e) => {
+      if (scoutPopupRef.current && !scoutPopupRef.current.contains(e.target)) {
+        setShowScout(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showScout]);
+
   const hasPending = pendingIncome >= 1;
   const passiveIncome = getPassiveIncome();
 
@@ -83,7 +96,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-amber-400 font-mono flex flex-col select-none overflow-hidden">
+    <div className="h-screen bg-black text-amber-400 font-mono flex flex-col overflow-hidden">
       {/* Scanlines */}
       <div className="pointer-events-none fixed inset-0 z-40"
         style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px)' }} />
@@ -102,7 +115,8 @@ export default function Home() {
             STUCKIE
           </span>
           <span className="text-green-400 text-xs animate-pulse">●</span>
-        </div>        <div className="flex items-center gap-2 text-xs">
+        </div>
+        <div className="flex items-center gap-2 text-xs">
           {passiveIncome > 0 && (
             <span className="text-green-400 hidden sm:block">
               +{passiveIncome >= 1000 ? `${(passiveIncome/1000).toFixed(1)}k` : Math.floor(passiveIncome)}/s
@@ -112,7 +126,7 @@ export default function Home() {
           <span className="text-zinc-500 hidden sm:block">{time}</span>
           <button onClick={() => setShowSave(true)}
             className="text-xs border border-zinc-700 text-zinc-500 px-2 py-0.5 rounded hover:border-amber-400 hover:text-amber-400 transition-colors">
-            💾 SAVE
+            💾 SIMPAN
           </button>
           <button
             onClick={() => {
@@ -133,14 +147,13 @@ export default function Home() {
 
       {/* Content */}
       <main className="flex-1 overflow-hidden">
-        <div className="h-full p-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 126px)' }}>
+        <div className="h-full p-3 flex flex-col">
           {activeTab === 'hq'       && <HQView />}
           {activeTab === 'world'    && <TycoonWorld />}
-          {activeTab === 'terminal' && <Terminal />}
-          {activeTab === 'upgrade'  && <UpgradeShop />}
-          {activeTab === 'news'     && <NewsFeed />}
-          {activeTab === 'whatif'   && <WhatIfSimulator />}
-          {activeTab === 'scout'    && <AIScout />}
+          {activeTab === 'terminal' && <div className="h-full overflow-y-auto"><Terminal /></div>}
+          {activeTab === 'upgrade'  && <div className="h-full overflow-y-auto"><UpgradeShop /></div>}
+          {activeTab === 'news'     && <div className="h-full overflow-y-auto"><NewsFeed /></div>}
+          {activeTab === 'whatif'   && <div className="h-full overflow-y-auto"><WhatIfSimulator /></div>}
         </div>
       </main>
 
@@ -206,6 +219,40 @@ export default function Home() {
       {saveToast && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded border border-green-500 bg-green-900 font-mono text-sm text-green-300">
           {saveToast}
+        </div>
+      )}
+
+      {/* AI Scout floating button */}
+      <button
+        onClick={() => setShowScout(s => !s)}
+        className="fixed bottom-20 right-4 z-[60] w-12 h-12 rounded-full border-2 border-cyan-400 bg-zinc-950 flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
+        style={{ boxShadow: showScout ? '0 0 20px #22d3ee88' : '0 0 10px #22d3ee44' }}
+        title="AI Scout"
+      >
+        <img src="/sprites/ai scout.png" alt="AI Scout" style={{ width: 32, height: 32, imageRendering: 'pixelated' }} />
+      </button>
+
+      {/* AI Scout popup — kiri dari tombol, tidak terpotong */}
+      {showScout && (
+        <div ref={scoutPopupRef} className="fixed z-[60] w-96 max-w-[calc(100vw-2rem)] h-[480px] border border-cyan-400/50 rounded-xl bg-zinc-950 shadow-2xl flex flex-col overflow-hidden"
+          style={{
+            bottom: 64,
+            right: 80,
+            boxShadow: '0 0 30px rgba(34,211,238,0.15)',
+          }}>
+          {/* Popup header */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 bg-zinc-900 shrink-0">
+            <div className="flex items-center gap-2">
+              <img src="/sprites/ai scout.png" alt="AI Scout" style={{ width: 20, height: 20, imageRendering: 'pixelated' }} />
+              <span className="text-cyan-400 font-mono text-xs font-bold tracking-widest">AI SCOUT</span>
+            </div>
+            <button onClick={() => setShowScout(false)}
+              className="text-zinc-500 hover:text-white transition-colors text-lg px-1">✕</button>
+          </div>
+          {/* Chat content */}
+          <div className="flex-1 overflow-hidden p-3">
+            <AIScout />
+          </div>
         </div>
       )}
     </div>

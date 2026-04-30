@@ -25,10 +25,8 @@ function formatTime(secs) {
   return h > 0 ? `${h}j ${m}m` : `${m}m`;
 }
 
-// 🔥 SAFE: only runs on client
 function readSlotMeta(slot) {
   if (typeof window === "undefined") return null;
-
   try {
     const raw = localStorage.getItem(`${SAVE_KEY_PREFIX}${slot}`);
     if (!raw) return null;
@@ -56,9 +54,7 @@ export default function StartScreen({ onStart }) {
   const { loadSlot, newGame, deleteSlot, exportSave, importSave } =
     useGameStore();
 
-  // 🔥 FIX: start with null (NO SSR mismatch)
   const [slots, setSlots] = useState(null);
-
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmNew, setConfirmNew] = useState(null);
   const [blink, setBlink] = useState(true);
@@ -67,7 +63,6 @@ export default function StartScreen({ onStart }) {
   const fileInputRef = useRef(null);
   const importSlotRef = useRef(null);
 
-  // 🔥 load AFTER mount
   useEffect(() => {
     setSlots(readAllSlots());
     const iv = setInterval(() => setBlink((b) => !b), 600);
@@ -135,9 +130,7 @@ export default function StartScreen({ onStart }) {
       const ok = importSave(importSlotRef.current, ev.target.result);
       if (ok) {
         refreshSlots();
-        showToast(
-          `✅ Slot ${importSlotRef.current + 1} berhasil diimport!`
-        );
+        showToast(`✅ Slot ${importSlotRef.current + 1} berhasil diimport!`);
       } else {
         showToast("❌ File tidak valid!", false);
       }
@@ -145,7 +138,6 @@ export default function StartScreen({ onStart }) {
     reader.readAsText(file);
   };
 
-  // 🔥 CRITICAL: prevent hydration mismatch
   if (!slots) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-amber-400 font-mono">
@@ -156,68 +148,40 @@ export default function StartScreen({ onStart }) {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono px-4">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".txt"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      <input ref={fileInputRef} type="file" accept=".txt" className="hidden" onChange={handleFileChange} />
 
-      <div className="text-amber-400 text-4xl font-bold mb-6">
-        STUCKIE
-      </div>
+      <div className="relative z-20 flex flex-col items-center gap-6 w-full max-w-lg">
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-amber-400 font-bold tracking-[0.3em]"
+            style={{ fontSize: 44, textShadow: '0 0 30px #f59e0b' }}>
+            STUCKIE
+          </div>
+          <div className="text-zinc-500 text-xs tracking-widest">
+            GAME TYCOON SIMULATOR KEUANGAN
+          </div>
+        </div>
 
-      <div className="w-full max-w-md flex flex-col gap-3">
-        {slots.map((meta, i) => {
-          const isConfirmingDelete = confirmDelete === i;
-          const isConfirmingNew = confirmNew === i;
-
-          return (
-            <div
-              key={i}
-              className={`border rounded-lg p-3 transition-all
-              ${
-                meta
-                  ? "border-amber-400/40 bg-zinc-900"
-                  : "border-zinc-700 bg-zinc-950"
-              }`}
-            >
-              <div className="text-xs text-zinc-400 mb-2">
-                SLOT {i + 1}
-              </div>
+        <div className="w-full flex flex-col gap-3">
+          {slots.map((meta, i) => (
+            <div key={i} className="border border-zinc-700 rounded-lg p-3 bg-zinc-950">
+              <div className="text-zinc-400 text-xs mb-2">SLOT {i + 1}</div>
 
               {meta ? (
-                <div className="flex flex-col gap-2 text-xs">
-                  <div className="text-amber-400">
-                    {formatRp(meta.balance)}
+                <>
+                  <div className="text-amber-400">{formatRp(meta.balance)}</div>
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={() => handleLoad(i)} className="flex-1 border border-amber-400 py-1">LANJUT</button>
+                    <button onClick={() => handleNew(i)} className="flex-1 border border-zinc-600 py-1">BARU</button>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleLoad(i)}
-                      className="flex-1 border border-amber-400 py-1"
-                    >
-                      LANJUT
-                    </button>
-                    <button
-                      onClick={() => handleNew(i)}
-                      className="flex-1 border border-zinc-600 py-1"
-                    >
-                      BARU
-                    </button>
-                  </div>
-                </div>
+                </>
               ) : (
-                <button
-                  onClick={() => handleNew(i)}
-                  className="w-full border border-dashed border-zinc-700 py-2 text-xs"
-                >
+                <button onClick={() => handleNew(i)} className="w-full border border-dashed border-zinc-700 py-2 text-xs">
                   + GAME BARU
                 </button>
               )}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );
